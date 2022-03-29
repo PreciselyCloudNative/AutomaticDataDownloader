@@ -1,0 +1,58 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.com.github.johnrengelman:shadow:7.1.2"
+    }
+}
+plugins {
+    id 'java'
+}
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'com.precisely.pdx.sdmTos3.Application'
+        )
+    }
+}
+group 'pdx-sdk-sample-commandline'
+version '3.0.3'
+def spark_version = '3.1.2'
+def scala_version = '2.12'
+
+repositories {
+    mavenCentral()
+}
+wrapper {
+    gradleVersion = "7.1"
+}
+
+dependencies {
+    implementation "org.apache.spark:spark-core_$scala_version:$spark_version"
+    implementation "org.apache.spark:spark-sql_$scala_version:$spark_version"
+    implementation 'commons-cli:commons-cli:1.5.0'
+    implementation 'org.apache.commons:commons-compress:1.21'
+    // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.475'
+    implementation fileTree(dir: "lib", include: "*.jar")
+
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.module/jackson-module-scala
+    implementation group: 'com.fasterxml.jackson.module', name: "jackson-module-scala_$scala_version", version: '2.13.1'
+
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+}
+apply plugin: "com.github.johnrengelman.shadow"
+shadowJar {
+    zip64 true
+}
+test {
+    useJUnitPlatform()
+}
+
+build.dependsOn(shadowJar)

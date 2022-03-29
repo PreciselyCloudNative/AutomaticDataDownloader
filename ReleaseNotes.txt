@@ -1,0 +1,196 @@
+Precisely Data Experience SDK-Java version 3.0.3 Release Notes
+
+Security Updates
+================
+Update Log4J to version 2.17.1 for CVE-2021-44832
+
+
+
+Precisely Data Experience SDK-Java version 3.0.2 Release Notes
+
+Security Updates
+================
+Update Log4J to version 2.17 for CVE-2021-45105
+
+
+
+Precisely Data Experience SDK-Java version 3.0.1 Release Notes
+
+Security Updates
+================
+Update Log4J to version 2.16 for CVE-2021-45046
+
+
+
+Precisely Data Experience SDK-Java version 3.0.0 Release Notes
+
+Security Updates
+================
+Update Log4J to version 2.15 for CVE-2021-44228
+
+Breaking Changes
+================
+As a major release, with some required breaking changes for new functionality, we have also taken the opportunity to
+apply other breaking changes that simplify the SDK.
+
+Data Delivery (file) download URL host name change
+--------------------------------------------------
+Although not a breaking change in its own right, due to the potential impact on firewall settings for some customers,
+we highlight this change in the breaking changes section.
+
+Due to a requirement of IPv6 capability for some customers, and also frequent requests for a simpler way to white list
+download URLs in firewalls, AWS S3 download URLs have been changed to use the dualstack format.  See:
+
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/dual-stack-endpoints.html#dual-stack-endpoints-description
+
+This format moves the name of a s3 bucket from the URL path to being part of the hostname.  Download URLs that used
+to begin with:
+
+https://s3.amazonaws.com/sdm-iad-907817318813-datalake/s/d/p/
+
+Now begin with:
+
+https://pdx-deliveries-prd.s3.dualstack.us-east-1.amazonaws.com/data/
+
+This allows for whitelisting based on hostname rather than URL path.
+
+
+Previously deprecated constructors have been removed
+----------------------------------------------------
+The following constructors have been removed
+
+DataDeliveryClient(String apiKey, String sharedSecret)
+DataDeliveryClient(
+  String apiKey,
+  String sharedSecret,
+  CloseableHttpClient client,
+  AuthorizationService authService)
+
+
+Removed the constructor that supplied a CloseableHttpClient and proxy configuration values
+------------------------------------------------------------------------------------------
+The following constructor has been removed
+
+DataDeliveryClient(
+  String apiKey,
+  String sharedSecret,
+  CloseableHttpClient client,
+  AuthorizationService authService,
+  String appId,
+  URL proxyUrl,
+  String proxyUserName,
+  String proxyPassword)
+
+Though a CloseableHttpClient was being provided in the constructor, the SDK was creating its own CloseableHttpClient
+instance for proxy connectivity, effectively ignoring the provided HttpClient.
+
+Now the caller has the option of calling a constructor providing EITHER the proxy configuration values for Url, User
+and Password OR a CloseableHttpClient.   When providing a CloseableHttpClient, it is the caller's responsibility to
+configure the CloseableHttpClient for proxying as needed.  When providing proxy configuration values, the
+DataDeliveryClient will construct a CloseableHttpClient configured for proxying.
+
+
+The AuthorizationService class has been made internal.
+------------------------------------------------------
+In the case where a proxy URL was provided, the AuthorizationService did not consistently apply usage of a provided
+CloseableHttpClient.  To provide consistency the AuthorizationService is now internal.  When a CloseableHttpClient is
+provided, the AuthorizationService will utilize it.  This class was primarily intended for internal testing purposes.
+
+As a result, the following constructor of the DataDeliveryClient class has had the AuthorizationService parameter
+removed:
+
+DataDeliveryClient(
+  String apiKey,
+  String sharedSecret,
+  CloseableHttpClient client,
+  AuthorizationService authService,
+  String appId)
+
+
+The ProductInfo class has been removed
+--------------------------------------
+This class contained a single property accessor, getDocs().  While the property name was plural, it contained a single
+object. The property name did not reflect the type that it contained and instead was associated with the underlying
+data store being used.  Since this class offers no Product attribute values to the client it was removed.
+
+
+The Docs class has been renamed DataDeliveriesSearchResult and is now a root object.
+------------------------------------------------------------------------------------
+The Docs class was plural despite the fact that it is not a collection.  The name Docs also does not reflect the
+type that it contains but is associated with the data store being utilized.
+
+
+The DeliveryInfo class has been renamed DataDelivery
+----------------------------------------------------
+Nouns like Info, Meta, etc. do not provide specific typing information and are extraneous in type naming.  The new type
+name is reflective of the resource it represents. While we have not changed the use of info everywhere to minimize
+changes, there was an issue with pluralization in the property accessor here as well, so we took the opportunity to
+rename the type.
+
+As a result, the property accessor that was
+
+class ProductInfo{
+  List<DeliveryInfo> getDeliveryInfo()
+}
+
+which was named in the singular despite returning a collection, is now
+
+class DataDeliveriesSearchResult{
+  List<DataDelivery> getDeliveries()
+}
+
+
+DataDeliveryClient ApiUrl property accessors have been removed.
+---------------------------------------------------------------
+This property of the DataDeliveryClient previously returned the root of API Urls utilized by the SDK.  The SDK
+now makes use of multiple API root paths and thus this property is no longer applicable.  The purpose of an SDK
+being abstraction of HTTP calls, exposure of URLS to calling code is also a leaky abstraction.
+
+HTTP Error Code Usage for getDeliveries()
+-----------------------------------------
+400 response code is used for parameter validation issues.
+404 response code is used when a product was specified that does not exist.
+
+
+400 Error Response Structure for getDeliveries()
+------------------------------------------------
+400 errors related to input validations will return an RFC7807 compliant "problem details" response.
+
+
+No result responses for getDeliveries()
+---------------------------------------
+When no deliveries are found, a 200 response will be returned with an empty "deliveries" array property, as is
+typical with search style APIs.
+
+No deliveries may be returned depending on the nature of the query being performed as it relates to the user's
+current state of product entitlement.  For example, entitlement could be expired.   The min_release_date query parameter
+may be greater than all available deliveries.
+
+
+Example of modified application code
+------------------------------------
+As a result of the changes mentioned above, code that might look like:
+
+ProductInfo productInfo = dataDeliveryClient.getProductInfo(...); // or dataDeliveryClient.getLatestProductInfo(...)
+List<DeliveryInfo> deliveries = productInfo.getDocs().getDeliveryInfo();
+
+Now will look similar to:
+
+DataDeliveriesSearchResult searchResult = dataDeliveryClient.getDeliveries(...); // or dataDeliveryClient.getLatestDeliveries
+List<DataDelivery> deliveries = searchResult.getDeliveries();
+
+
+Fixes
+=====
+The DataDeliveryClient class now implements the AutoClosable interface.  Therefore, it can be used in
+try-with-resources statements.  This comes in the form of the new Close class method. When closed either explicitly or
+when using a try-with-resources statement, closeable resources that were created by the DataDeliveryClient are now
+properly closed as well. It is the caller's responsibility to close any closable instances that are provided to the
+DataDeliveryClient through constructor parameters.  Prior to this fix, there was no way to properly close the closable
+class instances that were created by the DataDeliveryClient.
+
+
+Enhancements
+============
+The getDeliveries() and getLatestDeliveries() methods add overloads that includes a dataFormat parameter, allowing
+the caller to filter results to deliveries for a specific data format (ex. CSV).
