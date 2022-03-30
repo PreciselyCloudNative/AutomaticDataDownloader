@@ -71,12 +71,12 @@ class ApacheCLIUtility {
                 .hasArg().build();
         options.addOption(downloadDelivery);
 
-        Option downloadLatest = Option.builder("ddl")
+        Option downloadLatestDelivery = Option.builder("dld")
                 .argName("productName#geography#roster-granularity#format#saveToS3#convertToParquet")
-                .required(false).longOpt("download-latest")
+                .required(false).longOpt("download-latest-delivery")
                 .desc("The option takes an argument which is composed of productName and format separated by #.")
                 .hasArg().build();
-        options.addOption(downloadLatest);
+        options.addOption(downloadLatestDelivery);
 
         Option downloadPath = Option.builder("d").argName("download-path").required(false).longOpt("download-path")
                 .desc("The takes an argument which is folder location to download delivery. If not provided then Downloads folder is used in user's home directory")

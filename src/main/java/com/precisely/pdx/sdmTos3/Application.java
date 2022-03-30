@@ -90,15 +90,15 @@ public class Application {
                 }
             }
             if ((commandLine.hasOption("lp") && !commandLine.hasOption("ld") && !commandLine.hasOption("lld")
-                    && !commandLine.hasOption("dd") && !commandLine.hasOption("ddl"))
+                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld"))
                     || (!commandLine.hasOption("lp") && commandLine.hasOption("ld") && !commandLine.hasOption("lld")
-                    && !commandLine.hasOption("dd") && !commandLine.hasOption("ddl"))
+                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld"))
                     || (!commandLine.hasOption("lp") && !commandLine.hasOption("ld") && commandLine.hasOption("lld")
-                    && !commandLine.hasOption("dd") && !commandLine.hasOption("ddl"))
+                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld"))
                     || (!commandLine.hasOption("lp") && !commandLine.hasOption("ld") && !commandLine.hasOption("lld")
-                    && commandLine.hasOption("dd") && !commandLine.hasOption("ddl"))
+                    && commandLine.hasOption("dd") && !commandLine.hasOption("dld"))
                     || (!commandLine.hasOption("lp") && !commandLine.hasOption("ld") && !commandLine.hasOption("lld")
-                    && !commandLine.hasOption("dd") && commandLine.hasOption("ddl"))) {
+                    && !commandLine.hasOption("dd") && commandLine.hasOption("dld"))) {
                 if (commandLine.hasOption("a") && commandLine.hasOption("s")) {
                     apiKey = commandLine.getOptionValue("a");
                     secret = commandLine.getOptionValue("s");
@@ -110,9 +110,9 @@ public class Application {
                     } else if (commandLine.hasOption("lld")) {
                         command = "lld";
                         value = commandLine.getOptionValue("lld");
-                    } else if (commandLine.hasOption("ddl")) {
-                        command = "ddl";
-                        value = commandLine.getOptionValue("ddl");
+                    } else if (commandLine.hasOption("dld")) {
+                        command = "dld";
+                        value = commandLine.getOptionValue("dld");
                         if (commandLine.hasOption("s3a") && commandLine.hasOption("s3s")
                                 && commandLine.hasOption("s3bucket") && commandLine.hasOption("s3post")) {
                             credentials = new BasicAWSCredentials(commandLine.getOptionValue("s3a"),
@@ -120,7 +120,7 @@ public class Application {
                             bucketName = commandLine.getOptionValue("s3bucket");
                             keyPostfix = commandLine.getOptionValue("s3post");
                         } else {
-                            System.out.println("-s3a, -s3s ,s3bucket, and s3post options are required for ddl options");
+                            System.out.println("-s3a, -s3s ,s3bucket, and s3post options are required for dld options");
                             System.exit(0);
                         }
                         if (commandLine.hasOption("d")) {
@@ -235,7 +235,7 @@ public class Application {
             case "dd":
                 download(value, apiKey, secret, downloadPath, proxyInfo);
                 break;
-            case "ddl":
+            case "dld":
                 downloadLatest(value, apiKey, secret, proxyInfo, downloadPath, credentials, bucketName, keyPostfix, hasHeader);
                 File[] files = Paths.get(downloadPath).toFile().listFiles();
                 for (File f : files) {
@@ -366,7 +366,7 @@ public class Application {
         String geography = null;
         String rosterGranularity = null;
         boolean convert = true;
-        boolean saveToS3 = true;
+        boolean saveToS3 = false;
         final String format;
         if (pieces.length == 4) {
             productName = pieces[0];
@@ -393,7 +393,7 @@ public class Application {
             format = null;
             System.out.println("The argument value provided  for lld should be proper.");
             System.out.println(
-                    "The lld option takes an argument which is composed of productName, geogrpahy and roster granularity and userPreference separated by #.");
+                    "The lld option takes an argument which is composed of productName, geography and roster granularity and userPreference separated by #.");
             System.exit(0);
         }
         DataDeliveriesSearchResult dataDeliveriesSearchResult;
