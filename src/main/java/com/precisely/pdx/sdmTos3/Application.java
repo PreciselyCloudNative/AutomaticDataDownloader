@@ -237,10 +237,7 @@ public class Application {
                 break;
             case "dld":
                 downloadLatest(value, apiKey, secret, proxyInfo, downloadPath, credentials, bucketName, keyPostfix, hasHeader);
-                File[] files = Paths.get(downloadPath).toFile().listFiles();
-                for (File f : files) {
-                    FileUtils.deleteDirectory(f);
-                }
+
                 System.exit(0);
                 break;
         }
@@ -366,7 +363,7 @@ public class Application {
         String geography = null;
         String rosterGranularity = null;
         boolean convert = true;
-        boolean saveToS3 = false;
+        boolean saveToS3 = true;
         final String format;
         if (pieces.length == 4) {
             productName = pieces[0];
@@ -496,6 +493,12 @@ public class Application {
             }
         } else {
             System.out.println("No delivery is found with provided arguments.");
+        }
+        if(saveToS3) {
+            File[] files = Paths.get(downloadPath).toFile().listFiles();
+            for (File f : files) {
+                FileUtils.deleteDirectory(f);
+            }
         }
     }
 
