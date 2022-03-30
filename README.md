@@ -6,8 +6,9 @@ This application is not intended for production use.
 
 ## System Requirements
 The following items are required to build and run the sample application.
-1. Java JDK 1.8
-2. Maven build tool
+1. Java JDK 11.0.14
+2. Gradle Build
+3. Hadoop (Installation Guide: https://gist.github.com/vorpal56/5e2b67b6be3a827b85ac82a63a5b3b2e)
 
 ## Build and Execute
 
@@ -27,7 +28,7 @@ Example:
 
 - Build the sample application jar using the following command
 
-    `mvn clean install`
+    `Gradle clean build`
 - change directories (cd) to the folder `{project.basedir}/target`
 - Execute commands like:
 
