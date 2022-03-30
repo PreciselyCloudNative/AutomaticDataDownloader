@@ -9,34 +9,26 @@ The following items are required to build and run the sample application.
 1. Java JDK 11.0.14
 2. Gradle Build
 3. Hadoop (Installation Guide: https://gist.github.com/vorpal56/5e2b67b6be3a827b85ac82a63a5b3b2e)
+    a. Add hadoop.dll file inside %HADOOP_HOME%/bin
 
 ## Build and Execute
 
 To build and run the sample app, perform the following steps:
-- Install the precisely-pdx-sdk-<version>-full.jar in the local maven repository, using the below command
-
-`mvn install:install-file -Dfile="/sdk/precisely-pdx-sdk-${BUILD_VERSION}-full.jar" \
--DgroupId="com.precisely.pdx" \
--DartifactId="precisely-pdx-sdk" \
--Dversion="${BUILD_VERSION}" \
--Dpackaging="jar"`
+- Install the precisely-pdx-sdk-<version>-full.jar in `{project.basedir}/lib` from data.precisely.com
 
 Example: 
-
-`mvn install:install-file -Dfile="D:\Precisely_Data_Experience_SDK-Java-v3.0.0\precisely-pdx-sdk-3.0.0-full.jar" 
--DgroupId="com.precisely.pdx" -DartifactId="precisely-pdx-sdk" -Dversion="3.0.0" -Dpackaging="jar"`
 
 - Build the sample application jar using the following command
 
-    `Gradle clean build`
-- change directories (cd) to the folder `{project.basedir}/target`
+    `gradlew clean build`
+- change directories (cd) to the folder `{project.basedir}/build/libs`
 - Execute commands like:
 
-   `java -jar pdx-sdk-sample-commandline-<version>-full.jar <command and options>`
+   `java -jar data-downloader-<version>-full.jar <command and options>`
 
 Example: 
 
-`java -jar pdx-sdk-sample-commandline-3.0.0-full.jar -lp -a dummyAPIkey123 -s dummyAPISecret123`
+`java -jar data-downloader-<version>-full.jar -lp -a dummyAPIkey123 -s dummyAPISecret123`
 
 ## Commands and Options
 
@@ -89,4 +81,9 @@ download delivery with proxy configuration information having username and passw
 `-dd "productName#geography#rosterGranularity#dataFormat#version#vintage#minReleaseDate" -a <apiKey> -s <secret> -c<https://myproxyServer.com:8080> -u <username> -p <password>`
 
 download latest delivery</br>
+`-dld "productName#geography#roster-granularity#format" -a <apiKey> -s <secret> --download-path <c:\downloads\> --s3-access <s3-access-key> --s3-secret <s3-secret key> --s3-bucket-name <s3-bucket-name> --s3-key-postfix <postfix>`
+
+download latest delivery with optional arguments
+saveToS3 (boolean) - Gives users an option to save the downloaded data to S3 and delete from local drive
+convertToParquet (boolean) - Decompress all zip files from downloaded data and converts the files to Parquet
 `-dld "productName#geography#roster-granularity#format#saveToS3#convertToParquet" -a <apiKey> -s <secret> --download-path <c:\downloads\> --s3-access <s3-access-key> --s3-secret <s3-secret key> --s3-bucket-name <s3-bucket-name> --s3-key-postfix <postfix>`
