@@ -80,10 +80,11 @@ download delivery with proxy configuration information having username and passw
 
 `-dd "productName#geography#rosterGranularity#dataFormat#version#vintage#minReleaseDate" -a <apiKey> -s <secret> -c<https://myproxyServer.com:8080> -u <username> -p <password>`
 
-download latest delivery</br>
+download latest delivery</br>  
 `-dld "productName#geography#roster-granularity#format" -a <apiKey> -s <secret> c<https://myproxyServer.com:8080> --download-path <c:\downloads\> --s3-access <s3-access-key> --s3-secret <s3-secret key> --s3-bucket-name <s3-bucket-name> --s3-key-postfix <postfix>`  
   
-download latest delivery with optional arguments  
+download latest delivery with optional arguments    
+  
 saveToS3 (boolean) - Gives users an option to save the downloaded data to S3 and delete from local drive  
 convertToParquet (boolean) - Decompress all zip files from downloaded data and converts the files to Parquet  
 `-dld "productName#geography#roster-granularity#format#saveToS3#convertToParquet" -a <apiKey> -s <secret> -c<https://myproxyServer.com:8080> --download-path <c:\downloads\> --s3-access <s3-access-key> --s3-secret <s3-secret key> --s3-bucket-name <s3-bucket-name> --s3-key-postfix <postfix>`
