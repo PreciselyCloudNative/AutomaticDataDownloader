@@ -80,7 +80,6 @@ download delivery with proxy configuration information having username and passw
 
 `-dd "productName#geography#rosterGranularity#dataFormat#version#vintage#minReleaseDate" -a <apiKey> -s <secret> -c<https://myproxyServer.com:8080> -u <username> -p <password>`
 
-<<<<<<< HEAD
 download latest delivery</br>  
 `-dld "productName#geography#roster-granularity#format" -a <apiKey> -s <secret> c<https://myproxyServer.com:8080> --download-path <c:\downloads\> --s3-access <s3-access-key> --s3-secret <s3-secret key> --s3-bucket-name <s3-bucket-name> --s3-key-postfix <postfix>`  
   
@@ -99,7 +98,7 @@ download latest delivery
 ### 1. Download Latest Delivery (DLD)
 
 Download latest deliver command will download the latest vintage precisely has to offer for the requested product. </br>
-The arguments are as follows:
+#### The arguments are as follows:
 
 1. jar file location  
     Eg. `java -jar "C:\DataDownloader\build\libs\data-downloader-3.0.3-all.jar"`  
@@ -111,7 +110,7 @@ The arguments are as follows:
         3c. roster-granularity :   
         3d. Format : file format in which you want downloaded data Eg. CSV  
         3e. (OPTIONAL) savetoS3 : Boolean value if you want to save data in a s3 bucket or not (Default = True). The files on local drive will be deleted once the data has been uploaded to S3 bucket. If the argument given is `False` then data stays on local Drive.    
-        3f. (OPTIONAL) convertToParquet : Boolean Value if you want to convert file to parquet.  
+        3f. (OPTIONAL) convertToParquet : Boolean Value if you want to convert the downloaded files to parquet.  
 4. `-a`: API Key  
 5. `-s` : Secret Key  
 6. `--download-path` : location in local drive where you want to download data  
@@ -120,5 +119,5 @@ The arguments are as follows:
 9. `--s3-bucket-name` : S3 bucket name  
 10. `--s3-key-postfix` : sub bucket directory</br>
 
-
-"Updated"
+#### The below diagram shows the working of DLD:
+![DLD_working](https://user-images.githubusercontent.com/30530766/162065304-c6600192-a5e1-4fde-ac0a-1a5f94058e2c.jpg)
