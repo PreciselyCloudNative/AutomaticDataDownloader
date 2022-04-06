@@ -89,3 +89,31 @@ saveToS3 (boolean) - Gives users an option to save the downloaded data to S3 and
 convertToParquet (boolean) - Decompress all zip files from downloaded data and converts the files to Parquet  
   
 `-dld "productName#geography#roster-granularity#format#saveToS3#convertToParquet" -a <apiKey> -s <secret> -c<https://myproxyServer.com:8080> --download-path <c:\downloads\> --s3-access <s3-access-key> --s3-secret <s3-secret key> --s3-bucket-name <s3-bucket-name> --s3-key-postfix <postfix>`
+
+## Architecture
+
+### 1. Download Latest Delivery (DLD)
+
+Download latest deliver command will download the latest vintage precisely has to offer for the requested product. </br>
+The arguments are as follows:
+
+1. jar file location  
+    Eg. `java -jar "C:\DataDownloader\build\libs\data-downloader-3.0.3-all.jar"`  
+2. `-dld` : Download latest Delivery  
+3. Name of product you want to download (as a string seperated by #)  
+    Eg. `"productName#geography#roster-granularity#format#saveToS3#convertToParquet"`  
+        3a. productName : Name of the product Eg. Genealogy Parent-Child Data US  
+        3b. geaography : Name of the region Eg. United States  
+        3c. roster-granularity :   
+        3d. Format : file format in which you want downloaded data Eg. CSV  
+        3e. (OPTIONAL) savetoS3 : Boolean value if you want to save data in a s3 bucket or not (Default = True). The files on local drive will be deleted once the data has been uploaded to S3 bucket. If the argument given is `False` then data stays on local Drive.    
+        3f. (OPTIONAL) convertToParquet : Boolean Value if you want to convert file to parquet.  
+4. `-a`: API Key  
+5. `-s` : Secret Key  
+6. `--download-path` : location in local drive where you want to download data  
+7. `--s3-access` : S3 access key  
+8. `--s3-secret` : S3 secret key  
+9. `--s3-bucket-name` : S3 bucket name  
+10. `--s3-key-postfix` : sub bucket directory  
+
+
