@@ -345,6 +345,7 @@ public class Application {
         }
         writeToConsole(dataDeliveriesSearchResult);
     }
+
     /**
      * Sample code to download all the product files from the first page from the
      * paginated list of files available for the product
@@ -373,23 +374,20 @@ public class Application {
             geography = pieces[1];
             rosterGranularity = pieces[2];
             format = pieces[3];
-        }
-        else if (pieces.length == 5) {
+        } else if (pieces.length == 5) {
             productName = pieces[0];
             geography = pieces[1];
             rosterGranularity = pieces[2];
             format = pieces[3];
             saveToS3 = parseBoolean(pieces[4]);
-        }
-        else if (pieces.length == 6) {
+        } else if (pieces.length == 6) {
             productName = pieces[0];
             geography = pieces[1];
             rosterGranularity = pieces[2];
             format = pieces[3];
             saveToS3 = parseBoolean(pieces[4]);
             convert = parseBoolean(pieces[5]);
-        }
-        else {
+        } else {
             format = null;
             System.out.println("The argument value provided  for lld should be proper.");
             System.out.println(
@@ -418,8 +416,7 @@ public class Application {
                         }
                     }
             );
-        }
-        else {
+        } else {
             System.out.println("Product Latest Info is not available");
             System.exit(0);
         }
@@ -490,7 +487,7 @@ public class Application {
                 }
             }
             System.out.println("All downloads complete");
-            if(saveToS3) {
+            if (saveToS3) {
                 createBucket(bucketName, credentials); //fix arguments
                 uploadDir(downloadPath, bucketName, keyPostfix, true, credentials);
             }
@@ -655,7 +652,7 @@ public class Application {
             String ext = FilenameUtils.getExtension(file.getName()).toLowerCase();
             if (ext.contains("7z") || ext.contains("zip")) {
                 extractDelivery(file);
-                if(convert){
+                if (convert) {
                     parquet(extractedDelivery, hasHeader);
                 }
                 if (itr_local) {
@@ -666,8 +663,6 @@ public class Application {
                 parquet(extractedDelivery, hasHeader);
             }
         }
-
-
     }
 
     private void parquet(File extractedDelivery, String hasHeader) throws IOException {
@@ -683,8 +678,10 @@ public class Application {
                 com.precisely.pdx.sdmTos3.ConvertUtils.csvToParquet(file, "true", "false");
 
             } else if (ext.equalsIgnoreCase("txt") || ext.equalsIgnoreCase("csv")) {
-                com.precisely.pdx.sdmTos3.ConvertUtils.csvToParquet(file, hasHeader, "true");
-                System.out.println(file);
+                if (!file.getName().equalsIgnoreCase("copyright.txt")) {
+                    com.precisely.pdx.sdmTos3.ConvertUtils.csvToParquet(file, hasHeader, "true");
+                    System.out.println(file);
+                }
             }
         }
     }
