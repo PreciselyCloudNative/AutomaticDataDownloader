@@ -80,7 +80,6 @@ download delivery with proxy configuration information having username and passw
 
 `-dd "productName#geography#rosterGranularity#dataFormat#version#vintage#minReleaseDate" -a <apiKey> -s <secret> -c<https://myproxyServer.com:8080> -u <username> -p <password>`
 
-<<<<<<< HEAD
 download latest delivery</br>  
 `-dld "productName#geography#roster-granularity#format" -a <apiKey> -s <secret> c<https://myproxyServer.com:8080> --download-path <c:\downloads\> --s3-access <s3-access-key> --s3-secret <s3-secret key> --s3-bucket-name <s3-bucket-name> --s3-key-postfix <postfix>`  
   
@@ -119,6 +118,3 @@ The arguments are as follows:
 8. `--s3-secret` : S3 secret key  
 9. `--s3-bucket-name` : S3 bucket name  
 10. `--s3-key-postfix` : sub bucket directory</br>
-
-
-"Updated"
