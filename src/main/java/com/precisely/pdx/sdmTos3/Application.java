@@ -666,7 +666,12 @@ public class Application {
                 }
             }
             if (convert & (ext.contains("csv") || ext.contains("txt"))) {
-                parquet(extractedDelivery, hasHeader);
+                if (file.getName() != "copyright.txt") {
+                    parquet(extractedDelivery, hasHeader);
+                }
+                else{
+                    continue;
+                }
             }
         }
 
@@ -682,12 +687,12 @@ public class Application {
             String ext = FilenameUtils.getExtension(file.getName());
             if (file.getName().toLowerCase().contains("header".toLowerCase())) {
                 System.out.println("File: " + file.getName() + " is a header file in this data set");
-
                 com.precisely.pdx.sdmTos3.ConvertUtils.csvToParquet(file, "true", "false");
-
             } else if (ext.equalsIgnoreCase("txt") || ext.equalsIgnoreCase("csv")) {
-                com.precisely.pdx.sdmTos3.ConvertUtils.csvToParquet(file, hasHeader, "true");
-                System.out.println(file);
+                if (!file.getName().equalsIgnoreCase("copyright.txt")) {
+                    com.precisely.pdx.sdmTos3.ConvertUtils.csvToParquet(file, hasHeader, "true");
+                    System.out.println(file);
+                }
             }
         }
     }
