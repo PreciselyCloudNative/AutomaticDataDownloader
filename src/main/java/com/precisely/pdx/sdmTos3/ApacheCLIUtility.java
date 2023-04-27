@@ -78,6 +78,13 @@ class ApacheCLIUtility {
                 .hasArg().build();
         options.addOption(downloadLatestDelivery);
 
+        Option downloadLatestDeliveryList = Option.builder("dldl")
+                .argName("productName#geography#roster-granularity#format")
+                .required(false).longOpt("download-latest-delivery-list")
+                .desc("The option takes an argument which is composed of productName and format separated by #.")
+                .hasArg().build();
+        options.addOption(downloadLatestDeliveryList);
+
         Option downloadPath = Option.builder("d").argName("download-path").required(false).longOpt("download-path")
                 .desc("The takes an argument which is folder location to download delivery. If not provided then Downloads folder is used in user's home directory")
                 .hasArg().build();
@@ -107,6 +114,10 @@ class ApacheCLIUtility {
         Option hasHeader = Option.builder("hh").argName("hasHeader").longOpt("has-header")
                 .desc("Your S3 secret key, which can be accessed from the AWS account.").hasArg().required(false).build();
         options.addOption(hasHeader);
+
+        Option suffix = Option.builder("suffix").argName("suffix").longOpt("suffix")
+                .desc("Your suffix for the download directory.").hasArg().required(false).build();
+        options.addOption(suffix);
 
         Option apiHost = Option.builder("ah").argName("apiHost").longOpt("api-host").required(false)
                 .desc("The host name for the SDK API. Default - api.precisely.com").hasArg().build();
