@@ -25,6 +25,8 @@ import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
+import java.util.HashMap;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -48,6 +50,7 @@ public class Application {
     static ArrayList<File> table = new ArrayList<>();
     private static String apiHostName;
 
+
     /**
      * The main method
      *
@@ -66,6 +69,7 @@ public class Application {
             String downloadPath = null;
             String bucketName = null;
             String keyPostfix = null;
+            String suffix = null;
             String hasHeader = "true";
             if (commandLine.hasOption("v")) {
                 System.out.println("The version of the SDK Sample app is " + VersionUtility.getVersionInfo());
@@ -90,15 +94,17 @@ public class Application {
                 }
             }
             if ((commandLine.hasOption("lp") && !commandLine.hasOption("ld") && !commandLine.hasOption("lld")
-                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld"))
+                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld") && !commandLine.hasOption("dldl"))
                     || (!commandLine.hasOption("lp") && commandLine.hasOption("ld") && !commandLine.hasOption("lld")
-                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld"))
+                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld") && !commandLine.hasOption("dldl"))
                     || (!commandLine.hasOption("lp") && !commandLine.hasOption("ld") && commandLine.hasOption("lld")
-                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld"))
+                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld") && !commandLine.hasOption("dldl"))
                     || (!commandLine.hasOption("lp") && !commandLine.hasOption("ld") && !commandLine.hasOption("lld")
-                    && commandLine.hasOption("dd") && !commandLine.hasOption("dld"))
+                    && commandLine.hasOption("dd") && !commandLine.hasOption("dld") && !commandLine.hasOption("dldl"))
                     || (!commandLine.hasOption("lp") && !commandLine.hasOption("ld") && !commandLine.hasOption("lld")
-                    && !commandLine.hasOption("dd") && commandLine.hasOption("dld"))) {
+                    && !commandLine.hasOption("dd") && commandLine.hasOption("dld") && !commandLine.hasOption("dldl"))
+                    || (!commandLine.hasOption("lp") && !commandLine.hasOption("ld") && !commandLine.hasOption("lld")
+                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld") && commandLine.hasOption("dldl"))) {
                 if (commandLine.hasOption("a") && commandLine.hasOption("s")) {
                     apiKey = commandLine.getOptionValue("a");
                     secret = commandLine.getOptionValue("s");
@@ -131,7 +137,24 @@ public class Application {
                         if (commandLine.hasOption("hh")) {
                             hasHeader = commandLine.getOptionValue("hh");
                         }
-                    } else {
+                    } else if (commandLine.hasOption("dldl")) {
+                        command = "dldl";
+                        value = commandLine.getOptionValue("dldl");
+
+                        if (commandLine.hasOption("suffix")) {
+                            suffix = commandLine.getOptionValue("suffix");
+                        }
+
+                        if (commandLine.hasOption("d")) {
+                            downloadPath = commandLine.getOptionValue("d");
+                        } else {
+                            downloadPath = downloadDirectory.getAbsolutePath();
+                        }
+                        if (commandLine.hasOption("hh")) {
+                            hasHeader = commandLine.getOptionValue("hh");
+                        }
+                    }
+                    else {
                         command = "dd";
                         value = commandLine.getOptionValue("dd");
                         if (commandLine.hasOption("d")) {
@@ -174,7 +197,7 @@ public class Application {
 //            }
             ProxyConnectionInfo proxyInfo = getProxyConfigurations(commandLine);
             Application app = new Application();
-            app.run(command, value, apiKey, secret, downloadPath, proxyInfo, credentials, bucketName, keyPostfix, hasHeader);
+            app.run(command, value, apiKey, secret, downloadPath, proxyInfo, credentials, bucketName, keyPostfix, suffix, hasHeader);
         } catch (Exception ex) {
             System.out.println(ex);
             ApacheCLIUtility.displayInformation();
@@ -220,7 +243,7 @@ public class Application {
     private void run(
             final String command, final String value, final String apiKey, final String secret,
             String downloadPath, ProxyConnectionInfo proxyInfo, BasicAWSCredentials credentials,
-            String bucketName, String keyPostfix, String hasHeader) throws Exception {
+            String bucketName, String keyPostfix, String suffix, String hasHeader) throws Exception {
         // determine the method to execute
         switch (command) {
             case "lp":
@@ -234,6 +257,9 @@ public class Application {
                 break;
             case "dd":
                 download(value, apiKey, secret, downloadPath, proxyInfo);
+                break;
+            case "dldl":
+                downloadLatestDeliveryList(value, apiKey, secret, proxyInfo, downloadPath, suffix, hasHeader);
                 break;
             case "dld":
                 downloadLatest(value, apiKey, secret, proxyInfo, downloadPath, credentials, bucketName, keyPostfix, hasHeader);
@@ -297,7 +323,7 @@ public class Application {
         final String geography = pieces[1];
         final String rosterGranularity = pieces[2];
         DataDeliveriesSearchResult dataDeliveriesSearchResult;
-        try (DataDeliveryClient client = createDataDeliveryClient(apiKey, secret, proxyInfo)) {
+        DataDeliveryClient client = createDataDeliveryClient(apiKey, secret, proxyInfo);
             // get the product info including delivery information available for download
             int pageNumber = 1;
             if (pieces.length == 3) {
@@ -306,7 +332,7 @@ public class Application {
                 Temporal minReleaseDate = LocalDate.parse(pieces[3]);
                 dataDeliveriesSearchResult = client.getDeliveries(productName, pageNumber, rosterGranularity, geography, minReleaseDate);
             }
-        }
+
         writeToConsole(dataDeliveriesSearchResult);
     }
 
@@ -336,10 +362,10 @@ public class Application {
         final String rosterGranularity = pieces[2];
         boolean userPreference = "true".equalsIgnoreCase(pieces[3]);
         DataDeliveriesSearchResult dataDeliveriesSearchResult;
-        try (DataDeliveryClient client = createDataDeliveryClient(apiKey, secret, proxyInfo)) {
+        DataDeliveryClient client = createDataDeliveryClient(apiKey, secret, proxyInfo);
             // get the product info including the latest delivery information available for download
             dataDeliveriesSearchResult = client.getLatestDeliveries(productName, pageNumber, rosterGranularity, geography, userPreference);
-        }
+
         writeToConsole(dataDeliveriesSearchResult);
     }
     /**
@@ -502,6 +528,266 @@ public class Application {
         }
     }
 
+    private void downloadLatestDeliveryList(String productInfo, final String apiKey, final String secret,
+                                            ProxyConnectionInfo proxyInfo, final String downloadPath, String suffix,
+                                            String hasHeader) throws DataDeliveryClientException, IOException, ArchiveException {
+
+
+        HashMap<String, String> datamap = new HashMap<>();
+        datamap.put("Geocoding Residential Delivery Indicator","RDI");
+        datamap.put("Geocoding LACSLink Database","LACSLink");
+
+        final String[] products = productInfo.split(",");
+
+
+
+        for (int i = 0; i < products.length; i++) {
+
+            final List<String> deliveryURLs = new ArrayList<>();
+            final List<String> vintage = new ArrayList<>();
+            final String[] pieces = products[i].split("#");
+            int pageNumber = 1;
+            String productName = null;
+            String geography = null;
+            String rosterGranularity = null;
+            boolean convert = true;
+            boolean saveToS3 = true;
+            final String format;
+            if (pieces.length == 4) {
+                productName = pieces[0];
+                geography = pieces[1];
+                rosterGranularity = pieces[2];
+                format = pieces[3];
+            } else if (pieces.length == 5) {
+                productName = pieces[0];
+                geography = pieces[1];
+                rosterGranularity = pieces[2];
+                format = pieces[3];
+                saveToS3 = parseBoolean(pieces[4]);
+            } else if (pieces.length == 6) {
+                productName = pieces[0];
+                geography = pieces[1];
+                rosterGranularity = pieces[2];
+                format = pieces[3];
+                saveToS3 = parseBoolean(pieces[4]);
+                convert = parseBoolean(pieces[5]);
+            } else {
+                format = null;
+                System.out.println("The argument value provided  for lld should be proper.");
+                System.out.println(
+                        "The lld option takes an argument which is composed of productName, geography and roster granularity and userPreference separated by #.");
+                System.exit(0);
+            }
+            DataDeliveriesSearchResult dataDeliveriesSearchResult;
+            DataDeliveryClient client = null;
+            if (null != proxyInfo) {
+                client = new DataDeliveryClient(apiKey, secret, APP_ID, proxyInfo.getProxyUrl(), proxyInfo.getUserName(),
+                        proxyInfo.getPassword());
+            } else {
+                client = new DataDeliveryClient(apiKey, secret, APP_ID);
+            }
+
+            if (format.equalsIgnoreCase("Spectrum Platform Data") || format.equalsIgnoreCase("Geocoding")
+                    || format.equalsIgnoreCase("Interactive")) {
+
+
+
+                    System.out.println("data downloading");
+                    // get the Latest Product info including delivery information available for download
+                    dataDeliveriesSearchResult = client.getLatestDeliveries(productName, pageNumber, rosterGranularity, geography);
+                    if (dataDeliveriesSearchResult.getTotalDeliveries() > 0) {
+                        dataDeliveriesSearchResult.getDeliveries().forEach(
+                                deliveryInfo -> {
+                                    if (deliveryInfo.getDataFormat().equalsIgnoreCase(format)) {
+                                        if (deliveryInfo.getDownloadUrl() != null && !"".equalsIgnoreCase(deliveryInfo.getDownloadUrl()))
+                                            deliveryURLs.add(deliveryInfo.getDownloadUrl());
+                                        vintage.add(deliveryInfo.getVintage());
+                                    }
+                                }
+                        );
+                    } else {
+                        System.out.println("Product Latest Info is not available");
+                        System.exit(0);
+                    }
+
+//                String folder ="";
+//                if(suffix==null){
+//                    folder = vintage.get(0) ;
+//                }
+//                else{
+//                    folder =vintage.get(0) + "." + suffix;
+//                }
+//
+//                String valueX = datamap.get(productName);
+//
+//                File folderY = new File(downloadPath + "/" + folder);
+//
+//                boolean download= true;
+//
+//                if (folderY.exists()) {
+//                    File[] files = folderY.listFiles();
+//                    for (File file : files) {
+//                        System.out.println("file.getName()"+ file.getName());
+//                        if (file.getName().startsWith(valueX)) {
+//                            download = false;
+//                            break;
+//                        }
+//                    }
+//                }
+
+
+                boolean download= true;
+//                if (download){
+
+                    String productDirectory = "";
+
+                    String urlPostfix = vintage.get(0) + "/" + deliveryURLs.get(0).replaceAll(".*/(.+)\\?.*", "$1");
+                    String name="";
+                    int fileIndex = 1;
+                    if (deliveryURLs.size() > 0) {
+                        //             download the files
+
+                        for (final String downloadUrl : deliveryURLs) {
+                            final String fileName = downloadUrl.replaceAll(".*/(.+)\\?.*", "$1");
+
+                            File folderY = new File(downloadPath);
+                                File[] files = folderY.listFiles();
+                                for (File file : files) {
+
+                                    if (file.isFile()) {
+
+                                        String fname1 = file.getName();
+                                        File filee1 = new File(fname1);
+                                        String nameWithoutExtension1 = filee1.getName().substring(0, filee1.getName().lastIndexOf('.'));
+
+                                        String fname2 = fileName;
+                                        File filee2 = new File(fname2);
+                                        String nameWithoutExtension2 = filee2.getName().substring(0, filee2.getName().lastIndexOf('.'));
+
+                                        if (nameWithoutExtension1.equals(nameWithoutExtension2)) {
+                                            download = false;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                            if (download) {
+                                name = fileName;
+                                System.out.println(String.format("Downloading file %d of %d %s to %s", fileIndex, deliveryURLs.size(),
+                                        fileName, downloadPath));
+                                //creating sub directories
+
+                                File directory_temp1 = Paths.get(downloadPath, productDirectory).toFile();
+                                if (!directory_temp1.exists()) {
+                                    directory_temp1.mkdir();
+                                }
+                                File directory_temp2 = Paths.get(directory_temp1.getPath(), vintage.get(0)).toFile();
+                                if (!directory_temp2.exists()) {
+                                    directory_temp2.mkdir();
+                                }
+                                File directory_temp3 = Paths.get(directory_temp2.getPath(), fileName).toFile();
+                                System.out.println(directory_temp1);
+//                        // create the file output stream.......Add checkdir checkpoint here
+                                try (final FileOutputStream fileOutput = new FileOutputStream(directory_temp3)) {
+//                            // call the SDK to download the file
+                                    client.downloadProductFile(downloadUrl, fileOutput, (url, totalBytes, bytesDownloaded) -> {
+                                        System.out.println(String.format("Progress for %s: %s%%", fileName,
+                                                Math.round((float) bytesDownloaded / totalBytes * 100)));
+                                        return true;
+                                    }, (url, totalBytes, bytesDownloaded) -> {
+                                        while (bytesDownloaded != totalBytes) {
+                                            continue;
+                                        }
+                                        if (totalBytes == bytesDownloaded) {
+                                            System.out.println("Complete Callback is done.");
+                                            return true;
+                                        }
+                                        return false;
+                                    });
+
+                                    System.out.println(String.format("Progress for %s: %s%%", fileName, "100"));
+                                } catch (final Exception ex) {
+                                    System.out.println("An error occurred saving the file.");
+                                }
+
+                                fileIndex++;
+                            } else {
+                                System.out.println("Data already exists: " +  productName);
+                            }
+
+                        }
+
+                        if (download) {
+
+                            System.out.println("All downloads complete");
+
+                            String folderPath = downloadPath;
+
+                            String fileName = name; // replace with your file name
+                            File filee = new File(fileName);
+                            String nameWithoutExtension = filee.getName().substring(0, filee.getName().lastIndexOf('.'));
+
+                            String fileN = nameWithoutExtension + ".txt"; // replace with desired file name
+
+                            File folder1 = new File(folderPath);
+                            File file = new File(folder1, fileN);
+
+                            try {
+                                file.createNewFile();
+                                System.out.println("File created successfully at location: " + file.getAbsolutePath());
+                            } catch (IOException e) {
+                                System.out.println("An error occurred while creating the file.");
+                                e.printStackTrace();
+                            }
+
+
+                            String sourcePath = downloadPath + "/" + vintage.get(0) + "/";
+                            String destPath = "";
+                            if (suffix == null) {
+                                destPath = downloadPath + "/" + vintage.get(0);
+                            } else {
+                                destPath = downloadPath + "/" + vintage.get(0) + "." + suffix;
+                            }
+
+                            String command = "C:/ga-sdk-dist-5.1.164/cli/cli.cmd extract --s " + sourcePath + " --d " + destPath;
+                            System.out.println("Extracting ");
+
+                            try {
+                                Process process = Runtime.getRuntime().exec(command);
+                                int exitCode = process.waitFor();
+                                if (exitCode == 0) {
+                                    System.out.println("Command executed successfully.");
+                                } else {
+                                    System.out.println("Command failed with exit code " + exitCode);
+                                }
+                            } catch (IOException | InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    if (download) {
+                        System.out.println("Deleting spd file");
+
+                        String directory = downloadPath + "/" + vintage.get(0);
+                        File[] filess = Paths.get(directory).toFile().listFiles();
+                        if (filess != null) {
+                            for (File file : filess) {
+                                file.delete();
+                            }
+                        }
+                        Paths.get(directory).toFile().delete();
+                    }
+
+//                else{
+//                    System.out.println("Data already exists: " + productName);
+//                }
+            }
+            else{
+                System.out.println("Incorrect data format: " + format);
+            }
+        }
+    }
+
     /**
      * Sample code to download all the product files from the first page from the
      * paginated list of files available for the product
@@ -530,7 +816,7 @@ public class Application {
         final String version = pieces[4];
         final String vintage = pieces[5];
         final List<String> deliveryURLs = new ArrayList<>();
-        try (DataDeliveryClient client = createDataDeliveryClient(apiKey, secret, proxyInfo)) {
+        DataDeliveryClient client = createDataDeliveryClient(apiKey, secret, proxyInfo);
             // get the product info including delivery information available for download
             int pageNumber = 1;
             DataDeliveriesSearchResult dataDeliveriesSearchResult;
@@ -586,7 +872,7 @@ public class Application {
 
             System.out.println("All downloads complete");
 
-        }
+
     }
 
     private void uploadDir(String dir_path, String bucket_name, String key_prefix, boolean recursive, AWSCredentials credentials) {

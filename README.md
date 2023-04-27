@@ -93,6 +93,10 @@ convertToParquet (boolean) - Decompress all zip files from downloaded data and c
 download latest delivery  
 `-dld "productName#geography#rosterGranularity#dataFormat" -a <apiKey> -s <secret> --download-path <c:\downloads\> --s3-access <s3-access-key> --s3-secret <s3-secret key> --s3-bucket-name <s3-bucket-name> --s3-key-postfix <postfix>`
 
+download latest delivery list 
+
+`-dldl "productName#geography#rosterGranularity#dataFormat" -a <apiKey> -s <secret> --download-path <c:\downloads\>  --s3-access <s3-access-key> `
+
 ## Architecture
 
 ### 1. Download Latest Delivery (DLD)
