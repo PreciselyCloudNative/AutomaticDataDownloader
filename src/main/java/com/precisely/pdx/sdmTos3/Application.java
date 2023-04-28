@@ -749,7 +749,7 @@ public class Application {
                                 destPath = downloadPath + "/" + vintage.get(0) + "." + suffix;
                             }
 
-                            String command = "C:/ga-sdk-dist-5.1.164/cli/cli.cmd extract --s " + sourcePath + " --d " + destPath;
+                            String command = "lib/ga-sdk-dist-5.1.164/cli/cli.cmd extract --s " + sourcePath + " --d " + destPath;
                             System.out.println("Extracting ");
 
                             try {
