@@ -126,3 +126,34 @@ Download latest deliver command will download the latest vintage precisely has t
 #### The below diagram shows the working of DLD:
 
 ![DLD_working_Final](https://user-images.githubusercontent.com/30530766/162287652-bfaebc7d-0343-4ca4-bc33-7c572a090455.jpg)
+
+
+### 2. Download Latest Delivery List (DLDL)
+
+Download latest deliver list command will download the latest vintage precisely has to offer for the requested product list and also extract the data. </br>
+#### The arguments are as follows:
+
+1. jar file location  
+   Example: `java -jar "C:\DataDownloader\build\libs\data-downloader-3.0.3-all.jar"`
+2. `-dldl` : Download latest Delivery list
+3. Name of product you want to download (as a string seperated by #)  
+   Example: `"productName#geography#roster-granularity#format"`  
+   i. productName : Name of the product. Example: Genealogy Parent-Child Data US  
+   ii. geaography : The geographic region or extent of the product. Example: United States  
+   iii. roster-granularity : The aggregate at which the data is stored in the file. Example: All USA
+   iv. Format : file format in which you want downloaded data. Example: CSV
+
+    Multiple products you want to download( as a string seperated by ,)    
+   Example: `"productName1#geography1#roster-granularity1#format1,productName2#geography2#roster-granularity2#format2"`
+
+4. `-a`: Automatic Downloader API Key
+5. `-s` : Automatic Downloader Shared Secret Key
+6. `-d` : location in local drive where you want to download data
+7. `-suffix` : suffix for the download directory
+8. `-cli` : path to the cli directory
+9. `-dv` : vintage you want to download for the products
+
+#### The below diagram shows the working of DLDL:
+
+![dldl-flow](https://github.com/PreciselyCloudNative/AutomaticDataDownloader/assets/86220719/1c90ca84-3e14-4ed9-beae-bd54bed11776)
+

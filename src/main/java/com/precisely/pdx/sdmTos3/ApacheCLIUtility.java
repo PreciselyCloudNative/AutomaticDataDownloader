@@ -119,6 +119,15 @@ class ApacheCLIUtility {
                 .desc("Your suffix for the download directory.").hasArg().required(false).build();
         options.addOption(suffix);
 
+        Option datavintage = Option.builder("dv").argName("datavintage").longOpt("data-vintage")
+                .desc("Your datavintage for the product.").hasArg().required(false).build();
+        options.addOption(datavintage);
+
+        Option clipath = Option.builder("cli").argName("cli-path").required(false).longOpt("cli-path")
+                .desc("The takes an argument which is folder location to cli directory.")
+                .hasArg().build();
+        options.addOption(clipath);
+
         Option apiHost = Option.builder("ah").argName("apiHost").longOpt("api-host").required(false)
                 .desc("The host name for the SDK API. Default - api.precisely.com").hasArg().build();
         options.addOption(apiHost);
