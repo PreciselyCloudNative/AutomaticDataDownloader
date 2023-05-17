@@ -155,5 +155,5 @@ Download latest deliver list command will download the latest vintage precisely 
 
 #### The below diagram shows the working of DLDL:
 
-![dldl-flow](https://github.com/PreciselyCloudNative/AutomaticDataDownloader/assets/86220719/1c90ca84-3e14-4ed9-beae-bd54bed11776)
+![dldl](https://github.com/PreciselyCloudNative/AutomaticDataDownloader/assets/86220719/da4f04be-1886-453b-8f7d-64701c443c86)
 
