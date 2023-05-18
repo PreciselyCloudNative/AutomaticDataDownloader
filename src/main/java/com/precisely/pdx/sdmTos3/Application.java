@@ -70,6 +70,8 @@ public class Application {
             String bucketName = null;
             String keyPostfix = null;
             String suffix = null;
+            String clipath = null;
+            String datavintage = null;
             String hasHeader = "true";
             if (commandLine.hasOption("v")) {
                 System.out.println("The version of the SDK Sample app is " + VersionUtility.getVersionInfo());
@@ -145,10 +147,17 @@ public class Application {
                             suffix = commandLine.getOptionValue("suffix");
                         }
 
+                        if (commandLine.hasOption("dv")) {
+                            datavintage = commandLine.getOptionValue("dv");
+                        }
+
                         if (commandLine.hasOption("d")) {
                             downloadPath = commandLine.getOptionValue("d");
                         } else {
                             downloadPath = downloadDirectory.getAbsolutePath();
+                        }
+                        if (commandLine.hasOption("cli")) {
+                            clipath = commandLine.getOptionValue("cli");
                         }
                         if (commandLine.hasOption("hh")) {
                             hasHeader = commandLine.getOptionValue("hh");
@@ -197,7 +206,7 @@ public class Application {
 //            }
             ProxyConnectionInfo proxyInfo = getProxyConfigurations(commandLine);
             Application app = new Application();
-            app.run(command, value, apiKey, secret, downloadPath, proxyInfo, credentials, bucketName, keyPostfix, suffix, hasHeader);
+            app.run(command, value, apiKey, secret, downloadPath, proxyInfo, credentials, bucketName, keyPostfix, suffix, clipath, datavintage, hasHeader);
         } catch (Exception ex) {
             System.out.println(ex);
             ApacheCLIUtility.displayInformation();
@@ -243,7 +252,7 @@ public class Application {
     private void run(
             final String command, final String value, final String apiKey, final String secret,
             String downloadPath, ProxyConnectionInfo proxyInfo, BasicAWSCredentials credentials,
-            String bucketName, String keyPostfix, String suffix, String hasHeader) throws Exception {
+            String bucketName, String keyPostfix, String suffix, String clipath, String datavintage, String hasHeader) throws Exception {
         // determine the method to execute
         switch (command) {
             case "lp":
@@ -259,7 +268,7 @@ public class Application {
                 download(value, apiKey, secret, downloadPath, proxyInfo);
                 break;
             case "dldl":
-                downloadLatestDeliveryList(value, apiKey, secret, proxyInfo, downloadPath, suffix, hasHeader);
+                downloadLatestDeliveryList(value, apiKey, secret, proxyInfo, downloadPath, suffix, clipath, datavintage,hasHeader);
                 break;
             case "dld":
                 downloadLatest(value, apiKey, secret, proxyInfo, downloadPath, credentials, bucketName, keyPostfix, hasHeader);
@@ -529,8 +538,8 @@ public class Application {
     }
 
     private void downloadLatestDeliveryList(String productInfo, final String apiKey, final String secret,
-                                            ProxyConnectionInfo proxyInfo, final String downloadPath, String suffix,
-                                            String hasHeader) throws DataDeliveryClientException, IOException, ArchiveException {
+                                            ProxyConnectionInfo proxyInfo, final String downloadPath, String suffix, String clipath,
+                                            String datavintage, String hasHeader) throws DataDeliveryClientException, IOException, ArchiveException {
 
 
         HashMap<String, String> datamap = new HashMap<>();
@@ -538,8 +547,7 @@ public class Application {
         datamap.put("Geocoding LACSLink Database","LACSLink");
 
         final String[] products = productInfo.split(",");
-
-
+        final String dataVintage = datavintage;
 
         for (int i = 0; i < products.length; i++) {
 
@@ -601,7 +609,14 @@ public class Application {
                                     if (deliveryInfo.getDataFormat().equalsIgnoreCase(format)) {
                                         if (deliveryInfo.getDownloadUrl() != null && !"".equalsIgnoreCase(deliveryInfo.getDownloadUrl()))
                                             deliveryURLs.add(deliveryInfo.getDownloadUrl());
-                                        vintage.add(deliveryInfo.getVintage());
+                                        if (datavintage==null ) {
+                                            vintage.add(deliveryInfo.getVintage());
+                                            System.out.println("main");
+                                        }
+                                        else{
+                                            vintage.add(dataVintage);
+                                            System.out.println("not main");
+                                        }
                                     }
                                 }
                         );
@@ -650,7 +665,15 @@ public class Application {
                         for (final String downloadUrl : deliveryURLs) {
                             final String fileName = downloadUrl.replaceAll(".*/(.+)\\?.*", "$1");
 
-                            File folderY = new File(downloadPath);
+                            String textfilepath = "";
+                            if (suffix == null) {
+                                textfilepath = downloadPath + "/" + vintage.get(0);
+                            } else {
+                                textfilepath = downloadPath + "/" + vintage.get(0) + "." + suffix;
+                            }
+
+                            File folderY = new File(textfilepath);
+                            if (folderY.exists() && folderY.isDirectory()) {
                                 File[] files = folderY.listFiles();
                                 for (File file : files) {
 
@@ -670,6 +693,7 @@ public class Application {
                                         }
                                     }
                                 }
+                            }
 
                             if (download) {
                                 name = fileName;
@@ -721,7 +745,49 @@ public class Application {
 
                             System.out.println("All downloads complete");
 
-                            String folderPath = downloadPath;
+
+
+                            String sourcePath = downloadPath + "/" + vintage.get(0) + "/";
+                            String destPath = "";
+                            if (suffix == null) {
+                                destPath = downloadPath + "/" + vintage.get(0);
+                            } else {
+                                destPath = downloadPath + "/" + vintage.get(0) + "." + suffix;
+                            }
+
+
+                            String os = System.getProperty("os.name");
+                            System.out.println("Operating System: " + os);
+
+                            String command ="";
+
+                            if(os.startsWith("Windows")){
+                                command = clipath+ "/cli.cmd extract --s " + sourcePath + " --d " + destPath;
+                            }
+                            else if (os.startsWith("Linux")) {
+                                command = clipath+ "/cli.sh extract --s " + sourcePath + " --d " + destPath;
+                            }
+//                            String command = "lib/ga-sdk-dist-5.1.164/cli/cli.cmd extract --s " + sourcePath + " --d " + destPath;
+                            System.out.println("Extracting ");
+
+                            try {
+                                Process process = Runtime.getRuntime().exec(command);
+                                int exitCode = process.waitFor();
+                                if (exitCode == 0) {
+                                    System.out.println("Command executed successfully.");
+                                } else {
+                                    System.out.println("Command failed with exit code " + exitCode);
+                                }
+                            } catch (IOException | InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            //                            String folderPath = downloadPath;
+                            String folderPath = "";
+                            if (suffix == null) {
+                                folderPath = downloadPath + "/" + vintage.get(0);
+                            } else {
+                                folderPath = downloadPath + "/" + vintage.get(0) + "." + suffix;
+                            }
 
                             String fileName = name; // replace with your file name
                             File filee = new File(fileName);
@@ -739,30 +805,6 @@ public class Application {
                                 System.out.println("An error occurred while creating the file.");
                                 e.printStackTrace();
                             }
-
-
-                            String sourcePath = downloadPath + "/" + vintage.get(0) + "/";
-                            String destPath = "";
-                            if (suffix == null) {
-                                destPath = downloadPath + "/" + vintage.get(0);
-                            } else {
-                                destPath = downloadPath + "/" + vintage.get(0) + "." + suffix;
-                            }
-
-                            String command = "lib/ga-sdk-dist-5.1.164/cli/cli.cmd extract --s " + sourcePath + " --d " + destPath;
-                            System.out.println("Extracting ");
-
-                            try {
-                                Process process = Runtime.getRuntime().exec(command);
-                                int exitCode = process.waitFor();
-                                if (exitCode == 0) {
-                                    System.out.println("Command executed successfully.");
-                                } else {
-                                    System.out.println("Command failed with exit code " + exitCode);
-                                }
-                            } catch (IOException | InterruptedException e) {
-                                e.printStackTrace();
-                            }
                         }
                     }
                     if (download) {
@@ -772,7 +814,9 @@ public class Application {
                         File[] filess = Paths.get(directory).toFile().listFiles();
                         if (filess != null) {
                             for (File file : filess) {
-                                file.delete();
+                                if (file.getName().endsWith(".spd")){
+                                    file.delete();
+                                }
                             }
                         }
                         Paths.get(directory).toFile().delete();
