@@ -67,6 +67,7 @@ public class Application {
             String apiKey = null;
             String secret = null;
             String downloadPath = null;
+            String directoryName = null;
             String bucketName = null;
             String keyPostfix = null;
             String suffix = null;
@@ -147,6 +148,10 @@ public class Application {
                             suffix = commandLine.getOptionValue("suffix");
                         }
 
+                        if (commandLine.hasOption("directoryName")) {
+                            directoryName = commandLine.getOptionValue("directoryName");
+                        }
+
                         if (commandLine.hasOption("dv")) {
                             datavintage = commandLine.getOptionValue("dv");
                         }
@@ -206,7 +211,7 @@ public class Application {
 //            }
             ProxyConnectionInfo proxyInfo = getProxyConfigurations(commandLine);
             Application app = new Application();
-            app.run(command, value, apiKey, secret, downloadPath, proxyInfo, credentials, bucketName, keyPostfix, suffix, clipath, datavintage, hasHeader);
+            app.run(command, value, apiKey, secret, downloadPath, proxyInfo, credentials, bucketName, keyPostfix, suffix, directoryName, clipath, datavintage, hasHeader);
         } catch (Exception ex) {
             System.out.println(ex);
             ApacheCLIUtility.displayInformation();
@@ -252,7 +257,7 @@ public class Application {
     private void run(
             final String command, final String value, final String apiKey, final String secret,
             String downloadPath, ProxyConnectionInfo proxyInfo, BasicAWSCredentials credentials,
-            String bucketName, String keyPostfix, String suffix, String clipath, String datavintage, String hasHeader) throws Exception {
+            String bucketName, String keyPostfix, String suffix, String directoryName, String clipath, String datavintage, String hasHeader) throws Exception {
         // determine the method to execute
         switch (command) {
             case "lp":
@@ -268,7 +273,7 @@ public class Application {
                 download(value, apiKey, secret, downloadPath, proxyInfo);
                 break;
             case "dldl":
-                downloadLatestDeliveryList(value, apiKey, secret, proxyInfo, downloadPath, suffix, clipath, datavintage,hasHeader);
+                downloadLatestDeliveryList(value, apiKey, secret, proxyInfo, downloadPath, directoryName, suffix, clipath, datavintage,hasHeader);
                 break;
             case "dld":
                 downloadLatest(value, apiKey, secret, proxyInfo, downloadPath, credentials, bucketName, keyPostfix, hasHeader);
@@ -538,7 +543,7 @@ public class Application {
     }
 
     private void downloadLatestDeliveryList(String productInfo, final String apiKey, final String secret,
-                                            ProxyConnectionInfo proxyInfo, final String downloadPath, String suffix, String clipath,
+                                            ProxyConnectionInfo proxyInfo, final String downloadPath, String directoryName, String suffix, String clipath,
                                             String datavintage, String hasHeader) throws DataDeliveryClientException, IOException, ArchiveException {
 
 
@@ -548,6 +553,7 @@ public class Application {
 
         final String[] products = productInfo.split(",");
         final String dataVintage = datavintage;
+        System.out.println("name :::"+ directoryName);
 
         for (int i = 0; i < products.length; i++) {
 
@@ -666,11 +672,19 @@ public class Application {
                             final String fileName = downloadUrl.replaceAll(".*/(.+)\\?.*", "$1");
 
                             String textfilepath = "";
-                            if (suffix == null) {
-                                textfilepath = downloadPath + "/" + vintage.get(0);
-                            } else {
-                                textfilepath = downloadPath + "/" + vintage.get(0) + "." + suffix;
+                            String dir_name = vintage.get(0);
+
+                            if (directoryName != null) {
+                                dir_name = directoryName;
                             }
+
+                            if (suffix == null) {
+                                textfilepath = downloadPath + "/" + dir_name;
+                            } else {
+                                textfilepath = downloadPath + "/" + dir_name + "." + suffix;
+                            }
+
+                            System.out.println("textfile "+ textfilepath);
 
                             File folderY = new File(textfilepath);
                             if (folderY.exists() && folderY.isDirectory()) {
@@ -705,7 +719,7 @@ public class Application {
                                 if (!directory_temp1.exists()) {
                                     directory_temp1.mkdir();
                                 }
-                                File directory_temp2 = Paths.get(directory_temp1.getPath(), vintage.get(0)).toFile();
+                                File directory_temp2 = Paths.get(directory_temp1.getPath(), dir_name).toFile();
                                 if (!directory_temp2.exists()) {
                                     directory_temp2.mkdir();
                                 }
@@ -746,14 +760,22 @@ public class Application {
                             System.out.println("All downloads complete");
 
 
+                            String dir_name = vintage.get(0);
 
-                            String sourcePath = downloadPath + "/" + vintage.get(0) + "/";
-                            String destPath = "";
-                            if (suffix == null) {
-                                destPath = downloadPath + "/" + vintage.get(0);
-                            } else {
-                                destPath = downloadPath + "/" + vintage.get(0) + "." + suffix;
+                            if (directoryName != null) {
+                                dir_name = directoryName;
                             }
+
+                            String sourcePath = downloadPath + "/" + dir_name + "/";
+                            String destPath = "";
+
+                            if (suffix == null) {
+                                destPath = downloadPath + "/" + dir_name;
+                            } else {
+                                destPath = downloadPath + "/" + dir_name + "." + suffix;
+                            }
+
+                            System.out.println("destpath:::::::"+ destPath);
 
 
                             String os = System.getProperty("os.name");
@@ -768,7 +790,7 @@ public class Application {
                                 command = clipath+ "/cli.sh extract --s " + sourcePath + " --d " + destPath;
                             }
 //                            String command = "lib/ga-sdk-dist-5.1.164/cli/cli.cmd extract --s " + sourcePath + " --d " + destPath;
-                            System.out.println("Extracting ");
+                            System.out.println("Extracting ::::"+ destPath);
 
                             try {
                                 Process process = Runtime.getRuntime().exec(command);
@@ -783,10 +805,11 @@ public class Application {
                             }
                             //                            String folderPath = downloadPath;
                             String folderPath = "";
+
                             if (suffix == null) {
-                                folderPath = downloadPath + "/" + vintage.get(0);
+                                folderPath = downloadPath + "/" + dir_name;
                             } else {
-                                folderPath = downloadPath + "/" + vintage.get(0) + "." + suffix;
+                                folderPath = downloadPath + "/" + dir_name + "." + suffix;
                             }
 
                             String fileName = name; // replace with your file name
@@ -810,7 +833,12 @@ public class Application {
                     if (download) {
                         System.out.println("Deleting spd file");
 
-                        String directory = downloadPath + "/" + vintage.get(0);
+                        String dir_name = vintage.get(0);
+                        if (directoryName != null) {
+                            dir_name = directoryName;
+                        }
+
+                        String directory = downloadPath + "/" + dir_name;
                         File[] filess = Paths.get(directory).toFile().listFiles();
                         if (filess != null) {
                             for (File file : filess) {
