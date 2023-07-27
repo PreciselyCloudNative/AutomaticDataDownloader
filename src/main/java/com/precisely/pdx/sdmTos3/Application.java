@@ -25,7 +25,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.hc.core5.net.URIBuilder;
+//import org.apache.hc.core5.net.URIBuilder;
 
 import java.net.http.HttpRequest;
 import java.util.HashMap;
@@ -621,7 +621,7 @@ public class Application {
                         exit(0);
                     }
                 } else {
-                    System.out.println("data downloading");
+                    System.out.println(dataVintage + " vintage downloading");
                     // get the specified vintage Product info including delivery information available for download
                     dataDeliveriesSearchResult = client.getDeliveries(productName, pageNumber, rosterGranularity, geography);
                     if (dataDeliveriesSearchResult.getTotalDeliveries() > 0) {
@@ -635,7 +635,7 @@ public class Application {
                                 }
                         );
                     } else {
-                        System.out.println("Product Latest Info is not available");
+                        System.out.println("Product's vintage " + dataVintage + " info is not available");
                         exit(0);
                     }
                     vintage.add(dataVintage);
