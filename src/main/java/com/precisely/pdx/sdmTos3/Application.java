@@ -28,6 +28,7 @@ import org.apache.commons.io.FilenameUtils;
 //import org.apache.hc.core5.net.URIBuilder;
 
 import java.net.http.HttpRequest;
+import java.nio.file.Files;
 import java.util.HashMap;
 
 import java.io.File;
@@ -43,6 +44,7 @@ import java.util.List;
 
 import static com.precisely.pdx.sdmTos3.ExtractUtils.extractDelivery;
 import static java.lang.System.exit;
+//import static jdk.internal.org.jline.utils.InfoCmp.Capability.lines;
 
 /**
  * A simple application that demonstrates the usage of the SDK.
@@ -600,212 +602,158 @@ public class Application {
             }
 
             if (format.equalsIgnoreCase("Spectrum Platform Data") || format.equalsIgnoreCase("Geocoding")
-                    || format.equalsIgnoreCase("Interactive")) {
+                    || format.equalsIgnoreCase("Interactive") || format.equalsIgnoreCase("ASCII")) {
 
-                if (datavintage == null) {
-                    System.out.println("data downloading");
-                    // get the Latest Product info including delivery information available for download
-                    dataDeliveriesSearchResult = client.getLatestDeliveries(productName, pageNumber, rosterGranularity, geography);
-                    if (dataDeliveriesSearchResult.getTotalDeliveries() > 0) {
-                        dataDeliveriesSearchResult.getDeliveries().forEach(
-                                deliveryInfo -> {
-                                    if (deliveryInfo.getDataFormat().equalsIgnoreCase(format)) {
-                                        if (deliveryInfo.getDownloadUrl() != null && !"".equalsIgnoreCase(deliveryInfo.getDownloadUrl()))
+                System.out.println("data downloading");
+                dataDeliveriesSearchResult = client.getLatestDeliveries(productName, pageNumber, rosterGranularity, geography);
+
+                if (dataDeliveriesSearchResult.getTotalDeliveries() > 0) {
+                    dataDeliveriesSearchResult.getDeliveries().forEach(
+                            deliveryInfo -> {
+                                if (deliveryInfo.getDataFormat().equalsIgnoreCase(format)) {
+                                    if (deliveryInfo.getDownloadUrl() != null && !"".equalsIgnoreCase(deliveryInfo.getDownloadUrl()))
                                         deliveryURLs.add(deliveryInfo.getDownloadUrl());
+
+                                    if (datavintage == null ) {
                                         vintage.add(deliveryInfo.getVintage());
+                                        System.out.println("main");
+                                    }
+                                    else{
+                                        vintage.add(dataVintage);
+                                        System.out.println("not main");
                                     }
                                 }
-                        );
-                    } else {
-                        System.out.println("Product Latest Info is not available");
-                        exit(0);
-                    }
+                            }
+                    );
                 } else {
-                    System.out.println(dataVintage + " vintage downloading");
-                    // get the specified vintage Product info including delivery information available for download
-                    dataDeliveriesSearchResult = client.getDeliveries(productName, pageNumber, rosterGranularity, geography);
-                    if (dataDeliveriesSearchResult.getTotalDeliveries() > 0) {
-                        dataDeliveriesSearchResult.getDeliveries().forEach(
-                                deliveryInfo -> {
-                                    if (deliveryInfo.getDataFormat().equalsIgnoreCase(format) && deliveryInfo.getVintage().equalsIgnoreCase(dataVintage)) {
-                                        if (deliveryInfo.getDownloadUrl() != null && !"".equalsIgnoreCase(deliveryInfo.getDownloadUrl()))
-                                            deliveryURLs.add(deliveryInfo.getDownloadUrl());
-                                            vintage.add(deliveryInfo.getVintage());
-                                    }
-                                }
-                        );
-                    } else {
-                        System.out.println("Product's vintage " + dataVintage + " info is not available");
-                        exit(0);
-                    }
-                    vintage.add(dataVintage);
+                    System.out.println("Product Latest Info is not available");
+                    System.exit(0);
                 }
 
-                boolean download = true;
-
+                boolean download= true;
                 String productDirectory = "";
-
-                String urlPostfix = vintage.get(0) + "/" + deliveryURLs.get(0).replaceAll(".*/(.+)\\?.*", "$1");
-                String name = "";
                 int fileIndex = 1;
-                if (deliveryURLs.size() > 0) {
-                    //             download the files
 
+                if (deliveryURLs.size() > 0) {
                     for (final String downloadUrl : deliveryURLs) {
                         final String fileName = downloadUrl.replaceAll(".*/(.+)\\?.*", "$1");
 
-                        String textfilepath = "";
-                        String dir_name = vintage.get(0);
+                        // Creating file reference
+                        File checkFile = new File(downloadPath + "/" + productDirectory + "/" + vintage.get(0) + "/" + fileName);
 
-                        if (directoryName != null) {
-                            dir_name = directoryName;
+                        // Check if file already exists
+                        if (checkFile.exists()) {
+                            System.out.println("Data already exists: " +  productName);
+                            continue;
                         }
-
-                        if (suffix == null) {
-                            textfilepath = downloadPath + "/" + dir_name;
-                        } else {
-                            textfilepath = downloadPath + "/" + dir_name + "." + suffix;
+                        System.out.println(String.format("Downloading file %d of %d %s to %s", fileIndex, deliveryURLs.size(),
+                                fileName, downloadPath));
+                        //creating sub directories
+                        File directory_temp1 = Paths.get(downloadPath, productDirectory).toFile();
+                        if (!directory_temp1.exists()) {
+                            directory_temp1.mkdir();
                         }
-
-                        System.out.println("textfile " + textfilepath);
-
-                        File folderY = new File(textfilepath);
-                        if (folderY.exists() && folderY.isDirectory()) {
-                            File[] files = folderY.listFiles();
-                            for (File file : files) {
-
-                                if (file.isFile()) {
-
-                                    String fname1 = file.getName();
-                                    File filee1 = new File(fname1);
-                                    String nameWithoutExtension1 = filee1.getName().substring(0, filee1.getName().lastIndexOf('.'));
-
-                                    String fname2 = fileName;
-                                    File filee2 = new File(fname2);
-                                    String nameWithoutExtension2 = filee2.getName().substring(0, filee2.getName().lastIndexOf('.'));
-
-                                    if (nameWithoutExtension1.equals(nameWithoutExtension2)) {
-                                        download = false;
-                                        break;
-                                    }
+                        File directory_temp2 = Paths.get(directory_temp1.getPath(), vintage.get(0)).toFile();
+                        if (!directory_temp2.exists()) {
+                            directory_temp2.mkdir();
+                        }
+                        File directory_temp3 = Paths.get(directory_temp2.getPath(), fileName).toFile();
+                        System.out.println(directory_temp1);
+                        try (final FileOutputStream fileOutput = new FileOutputStream(directory_temp3)) {
+                            client.downloadProductFile(downloadUrl, fileOutput, (url, totalBytes, bytesDownloaded) -> {
+                                System.out.println(String.format("Progress for %s: %s%%", fileName,
+                                        Math.round((float) bytesDownloaded / totalBytes * 100)));
+                                return true;
+                            }, (url, totalBytes, bytesDownloaded) -> {
+                                while (bytesDownloaded != totalBytes) {
+                                    continue;
                                 }
-                            }
-                        }
-
-                        if (download) {
-                            name = fileName;
-                            System.out.println(String.format("Downloading file %d of %d %s to %s", fileIndex, deliveryURLs.size(),
-                                    fileName, downloadPath));
-                            //creating sub directories
-
-                            File directory_temp1 = Paths.get(downloadPath, productDirectory).toFile();
-                            if (!directory_temp1.exists()) {
-                                directory_temp1.mkdir();
-                            }
-                            File directory_temp2 = Paths.get(directory_temp1.getPath(), dir_name).toFile();
-                            if (!directory_temp2.exists()) {
-                                directory_temp2.mkdir();
-                            }
-                            File directory_temp3 = Paths.get(directory_temp2.getPath(), fileName).toFile();
-
-//                        // create the file output stream.......Add checkdir checkpoint here
-                            try (final FileOutputStream fileOutput = new FileOutputStream(directory_temp3)) {
-//                            // call the SDK to download the file
-                                client.downloadProductFile(downloadUrl, fileOutput, (url, totalBytes, bytesDownloaded) -> {
-                                    System.out.println(String.format("Progress for %s: %s%%", fileName,
-                                            Math.round((float) bytesDownloaded / totalBytes * 100)));
+                                if (totalBytes == bytesDownloaded) {
+                                    System.out.println("Complete Callback is done.");
                                     return true;
-                                }, (url, totalBytes, bytesDownloaded) -> {
-                                    while (bytesDownloaded != totalBytes) {
-                                        continue;
-                                    }
-                                    if (totalBytes == bytesDownloaded) {
-                                        System.out.println("Complete Callback is done.");
-                                        return true;
-                                    }
-                                    return false;
-                                });
+                                }
+                                return false;
+                            });
 
-                                System.out.println(String.format("Progress for %s: %s%%", fileName, "100"));
-                            } catch (final Exception ex) {
-                                System.out.println("An error occurred saving the file.");
-                            }
-
-                            fileIndex++;
-                        } else {
-                            System.out.println("Data already exists: " + productName);
+                            System.out.println(String.format("Progress for %s: %s%%", fileName, "100"));
+                        } catch (final Exception ex) {
+                            System.out.println("An error occurred saving the file.");
                         }
-
-                    }
-
-                    if (download) {
-
-                        System.out.println("All downloads complete");
-
-
-                        String dir_name = vintage.get(0);
-
-                        if (directoryName != null) {
-                            dir_name = directoryName;
-                        }
-
-                        String sourcePath = downloadPath + "/" + dir_name + "/";
-                        String destPath = "";
-
-                        if (suffix == null) {
-                            destPath = downloadPath + "/" + dir_name;
-                        } else {
-                            destPath = downloadPath + "/" + dir_name + "." + suffix;
-                        }
-
-
-                        String os = System.getProperty("os.name");
-
-                        String command = "";
-
-                        if (os.startsWith("Windows")) {
-                            command = clipath + "/cli.cmd extract --s " + sourcePath + " --d " + destPath;
-                        } else if (os.startsWith("Linux")) {
-                            command = clipath + "/cli.sh extract --s " + sourcePath + " --d " + destPath;
-                        }
-
-                        try {
-                            Process process = Runtime.getRuntime().exec(command);
-                            int exitCode = process.waitFor();
-                            if (exitCode == 0) {
-                                System.out.println("Command executed successfully.");
-                            } else {
-                                System.out.println("Command failed with exit code " + exitCode);
-                            }
-                        } catch (IOException | InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        String folderPath = "";
-
-                        if (suffix == null) {
-                            folderPath = downloadPath + "/" + dir_name;
-                        } else {
-                            folderPath = downloadPath + "/" + dir_name + "." + suffix;
-                        }
-
-                        String fileName = name;
-                        File filee = new File(fileName);
-                        String nameWithoutExtension = filee.getName().substring(0, filee.getName().lastIndexOf('.'));
-
-                        String fileN = nameWithoutExtension + ".txt";
-
-                        File folder1 = new File(folderPath);
-                        File file = new File(folder1, fileN);
-
-                        try {
-                            file.createNewFile();
-                            System.out.println("File created successfully at location: " + file.getAbsolutePath());
-                        } catch (IOException e) {
-                            System.out.println("An error occurred while creating the file.");
-                            e.printStackTrace();
-                        }
+                        fileIndex++;
                     }
                 }
+
+                if (download) {
+
+                    System.out.println("All downloads complete");
+
+
+
+                    String sourcePath = downloadPath + "/" + vintage.get(0) + "/";
+                    String destPath = "";
+                    if (suffix == null) {
+                        destPath = downloadPath + "/" + vintage.get(0);
+                    } else {
+                        destPath = downloadPath + "/" + vintage.get(0) + "." + suffix;
+                    }
+
+
+                    String os = System.getProperty("os.name");
+                    System.out.println("Operating System: " + os);
+
+                    String command ="";
+
+                    if(os.startsWith("Windows")){
+                        command = clipath+ "/cli.cmd extract --s " + sourcePath + " --d " + destPath;
+                    }
+                    else if (os.startsWith("Linux")) {
+                        command = clipath+ "/cli.sh extract --s " + sourcePath + " --d " + destPath;
+                    }
+//                            String command = "lib/ga-sdk-dist-5.1.164/cli/cli.cmd extract --s " + sourcePath + " --d " + destPath;
+                    System.out.println("Extracting ");
+
+                    try {
+                        Process process = Runtime.getRuntime().exec(command);
+                        int exitCode = process.waitFor();
+                        if (exitCode == 0) {
+                            System.out.println("Command executed successfully.");
+                        } else {
+                            System.out.println("Command failed with exit code " + exitCode);
+                        }
+                    } catch (IOException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    //                            String folderPath = downloadPath;
+                    String folderPath = "";
+                    if (suffix == null) {
+                        folderPath = downloadPath + "/" + vintage.get(0);
+                    } else {
+                        folderPath = downloadPath + "/" + vintage.get(0) + "." + suffix;
+                    }
+
+                    String fileName = "name"; // replace with your file name
+                    File filee = new File(fileName);
+                    String nameWithoutExtension = "";
+                    if (filee.getName().contains(".")) {
+                        nameWithoutExtension = filee.getName().substring(0, filee.getName().lastIndexOf('.'));
+                    } else {
+                        nameWithoutExtension = filee.getName();
+                    }
+
+                    String fileN = nameWithoutExtension + ".txt"; // replace with desired file name
+
+                    File folder1 = new File(folderPath);
+                    File file = new File(folder1, fileN);
+
+                    try {
+                        file.createNewFile();
+                        System.out.println("File created successfully at location: " + file.getAbsolutePath());
+                    } catch (IOException e) {
+                        System.out.println("An error occurred while creating the file.");
+                        e.printStackTrace();
+                    }
+                }
+
                 if (download) {
                     System.out.println("Deleting spd file");
 
