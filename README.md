@@ -95,7 +95,7 @@ download latest delivery
 
 download latest delivery list 
 
-`-dldl "productName#geography#rosterGranularity#dataFormat" -a <apiKey> -s <secret> --download-path <c:\downloads\>  --s3-access <s3-access-key> `
+`-dldl "productName#geography#rosterGranularity#dataFormat" -a <apiKey> -s <secret> --download-path <c:\downloads\>  --s3-access <s3-access-key> --d  --suffix  --cli  --dv  --directoryName`
 
 ## Architecture
 
@@ -152,6 +152,7 @@ Download latest deliver list command will download the latest vintage precisely 
 7. `-suffix` : suffix for the download directory
 8. `-cli` : path to the cli directory
 9. `-dv` : vintage you want to download for the products
+10. `-directoryName` : name of the directory where you want to download the products
 
 #### The below diagram shows the working of DLDL:
 

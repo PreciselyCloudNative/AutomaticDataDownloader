@@ -119,6 +119,10 @@ class ApacheCLIUtility {
                 .desc("Your suffix for the download directory.").hasArg().required(false).build();
         options.addOption(suffix);
 
+        Option directoryName = Option.builder("directoryName").argName("directoryName").longOpt("directoryName")
+                .desc("Your directoryName for the download directory.").hasArg().required(false).build();
+        options.addOption(directoryName);
+
         Option datavintage = Option.builder("dv").argName("datavintage").longOpt("data-vintage")
                 .desc("Your datavintage for the product.").hasArg().required(false).build();
         options.addOption(datavintage);
