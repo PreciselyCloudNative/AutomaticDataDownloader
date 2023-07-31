@@ -409,7 +409,6 @@ public class Application {
         String geography = null;
         String rosterGranularity = null;
         boolean convert = true;
-        boolean saveToS3 = true;
         final String format;
         if (pieces.length == 4) {
             productName = pieces[0];
@@ -421,13 +420,11 @@ public class Application {
             geography = pieces[1];
             rosterGranularity = pieces[2];
             format = pieces[3];
-            saveToS3 = parseBoolean(pieces[4]);
         } else if (pieces.length == 6) {
             productName = pieces[0];
             geography = pieces[1];
             rosterGranularity = pieces[2];
             format = pieces[3];
-            saveToS3 = parseBoolean(pieces[4]);
             convert = parseBoolean(pieces[5]);
         } else {
             format = null;
@@ -529,19 +526,11 @@ public class Application {
                 }
             }
             System.out.println("All downloads complete");
-            if (saveToS3) {
-                createBucket(bucketName, credentials); //fix arguments
-                uploadDir(downloadPath, bucketName, keyPostfix, true, credentials);
-            }
+
         } else {
             System.out.println("No delivery is found with provided arguments.");
         }
-        if (saveToS3) {
-            File[] files = Paths.get(downloadPath).toFile().listFiles();
-            for (File f : files) {
-                FileUtils.deleteDirectory(f);
-            }
-        }
+
     }
 
     private void downloadLatestDeliveryList(String productInfo, final String apiKey, final String secret,
@@ -553,7 +542,6 @@ public class Application {
 
         final String[] products = productInfo.split(",");
         final String dataVintage = datavintage;
-        System.out.println("name :::" + directoryName);
 
         for (int i = 0; i < products.length; i++) {
 
@@ -565,7 +553,6 @@ public class Application {
             String geography = null;
             String rosterGranularity = null;
             boolean convert = true;
-            boolean saveToS3 = true;
             final String format;
             if (pieces.length == 4) {
                 productName = pieces[0];
@@ -577,13 +564,11 @@ public class Application {
                 geography = pieces[1];
                 rosterGranularity = pieces[2];
                 format = pieces[3];
-                saveToS3 = parseBoolean(pieces[4]);
             } else if (pieces.length == 6) {
                 productName = pieces[0];
                 geography = pieces[1];
                 rosterGranularity = pieces[2];
                 format = pieces[3];
-                saveToS3 = parseBoolean(pieces[4]);
                 convert = parseBoolean(pieces[5]);
             } else {
                 format = null;
@@ -604,30 +589,48 @@ public class Application {
             if (format.equalsIgnoreCase("Spectrum Platform Data") || format.equalsIgnoreCase("Geocoding")
                     || format.equalsIgnoreCase("Interactive") || format.equalsIgnoreCase("ASCII")) {
 
-                System.out.println("data downloading");
-                dataDeliveriesSearchResult = client.getLatestDeliveries(productName, pageNumber, rosterGranularity, geography);
 
-                if (dataDeliveriesSearchResult.getTotalDeliveries() > 0) {
-                    dataDeliveriesSearchResult.getDeliveries().forEach(
-                            deliveryInfo -> {
-                                if (deliveryInfo.getDataFormat().equalsIgnoreCase(format)) {
-                                    if (deliveryInfo.getDownloadUrl() != null && !"".equalsIgnoreCase(deliveryInfo.getDownloadUrl()))
-                                        deliveryURLs.add(deliveryInfo.getDownloadUrl());
-
-                                    if (datavintage == null ) {
+                // downloading a specific vintage
+                if (datavintage == null) {
+                    System.out.println("data downloading");
+                    // get the Latest Product info including delivery information available for download
+                    dataDeliveriesSearchResult = client.getLatestDeliveries(productName, pageNumber, rosterGranularity, geography);
+                    if (dataDeliveriesSearchResult.getTotalDeliveries() > 0) {
+                        dataDeliveriesSearchResult.getDeliveries().forEach(
+                                deliveryInfo -> {
+                                    if (deliveryInfo.getDataFormat().equalsIgnoreCase(format)) {
+                                        if (deliveryInfo.getDownloadUrl() != null && !"".equalsIgnoreCase(deliveryInfo.getDownloadUrl()))
+                                            deliveryURLs.add(deliveryInfo.getDownloadUrl());
                                         vintage.add(deliveryInfo.getVintage());
-                                        System.out.println("main");
-                                    }
-                                    else{
-                                        vintage.add(dataVintage);
-                                        System.out.println("not main");
                                     }
                                 }
-                            }
-                    );
-                } else {
-                    System.out.println("Product Latest Info is not available");
-                    System.exit(0);
+                        );
+                    } else {
+                        System.out.println("Product Latest Info is not available");
+                        exit(0);
+                    }
+                }
+                // downloading the latest vintage
+                else {
+                    System.out.println("data downloading");
+                    // get the specified vintage Product info including delivery information available for download
+                    dataDeliveriesSearchResult = client.getDeliveries(productName, pageNumber, rosterGranularity, geography);
+                    if (dataDeliveriesSearchResult.getTotalDeliveries() > 0) {
+                        dataDeliveriesSearchResult.getDeliveries().forEach(
+                                deliveryInfo -> {
+                                    if (deliveryInfo.getDataFormat().equalsIgnoreCase(format) && deliveryInfo.getVintage().equalsIgnoreCase(dataVintage)) {
+                                        if (deliveryInfo.getDownloadUrl() != null && !"".equalsIgnoreCase(deliveryInfo.getDownloadUrl()))
+                                            deliveryURLs.add(deliveryInfo.getDownloadUrl());
+
+                                            vintage.add(deliveryInfo.getVintage());
+                                    }
+                                }
+                        );
+                    } else {
+                        System.out.println("Product Latest Info is not available");
+                        exit(0);
+                    }
+                    vintage.add(dataVintage);
                 }
 
                 boolean download= true;
@@ -638,8 +641,21 @@ public class Application {
                     for (final String downloadUrl : deliveryURLs) {
                         final String fileName = downloadUrl.replaceAll(".*/(.+)\\?.*", "$1");
 
-                        // Creating file reference
-                        File checkFile = new File(downloadPath + "/" + productDirectory + "/" + vintage.get(0) + "/" + fileName);
+                        String dir_name = vintage.get(0);
+
+                        if (directoryName != null) {
+                            dir_name = directoryName;
+                        }
+
+                        File checkFile =null;
+                        if (suffix==null){
+                            checkFile = new File(downloadPath + "/" + productDirectory + "/" + dir_name + "/" + fileName);
+                        }
+                        else{
+                            checkFile = new File(downloadPath + "/" + productDirectory + "/" + dir_name+"."+suffix + "/" + fileName);
+                        }
+
+                        System.out.println("name of dir"+ checkFile);
 
                         // Check if file already exists
                         if (checkFile.exists()) {
@@ -648,12 +664,19 @@ public class Application {
                         }
                         System.out.println(String.format("Downloading file %d of %d %s to %s", fileIndex, deliveryURLs.size(),
                                 fileName, downloadPath));
-                        //creating sub directories
+
+                        //creating subdirectories
                         File directory_temp1 = Paths.get(downloadPath, productDirectory).toFile();
                         if (!directory_temp1.exists()) {
                             directory_temp1.mkdir();
                         }
-                        File directory_temp2 = Paths.get(directory_temp1.getPath(), vintage.get(0)).toFile();
+                        File directory_temp2 = null;
+                        if (suffix==null){
+                            directory_temp2 = Paths.get(directory_temp1.getPath(), dir_name).toFile();
+                        }
+                        else {
+                            directory_temp2 = Paths.get(directory_temp1.getPath(), dir_name+"."+suffix).toFile();
+                        }
                         if (!directory_temp2.exists()) {
                             directory_temp2.mkdir();
                         }
@@ -674,7 +697,6 @@ public class Application {
                                 }
                                 return false;
                             });
-
                             System.out.println(String.format("Progress for %s: %s%%", fileName, "100"));
                         } catch (final Exception ex) {
                             System.out.println("An error occurred saving the file.");
@@ -687,51 +709,44 @@ public class Application {
 
                     System.out.println("All downloads complete");
 
+                    String textfilepath = "";
+                    String dir_name = vintage.get(0);
 
-
-                    String sourcePath = downloadPath + "/" + vintage.get(0) + "/";
-                    String destPath = "";
-                    if (suffix == null) {
-                        destPath = downloadPath + "/" + vintage.get(0);
-                    } else {
-                        destPath = downloadPath + "/" + vintage.get(0) + "." + suffix;
+                    if (directoryName != null) {
+                        dir_name = directoryName;
                     }
 
+                    String sourcePath = downloadPath + "/" + dir_name + "/";
+                    String destPath = "";
+                    if (suffix == null) {
+                        destPath = downloadPath + "/" + dir_name;
+                    } else {
+                        destPath = downloadPath + "/" + dir_name + "." + suffix;
+                    }
 
                     String os = System.getProperty("os.name");
-                    System.out.println("Operating System: " + os);
 
                     String command ="";
 
-                    if(os.startsWith("Windows")){
-                        command = clipath+ "/cli.cmd extract --s " + sourcePath + " --d " + destPath;
-                    }
-                    else if (os.startsWith("Linux")) {
-                        command = clipath+ "/cli.sh extract --s " + sourcePath + " --d " + destPath;
-                    }
-//                            String command = "lib/ga-sdk-dist-5.1.164/cli/cli.cmd extract --s " + sourcePath + " --d " + destPath;
-                    System.out.println("Extracting ");
+                    if (clipath!=null) {
 
-                    try {
-                        Process process = Runtime.getRuntime().exec(command);
-                        int exitCode = process.waitFor();
-                        if (exitCode == 0) {
-                            System.out.println("Command executed successfully.");
-                        } else {
-                            System.out.println("Command failed with exit code " + exitCode);
+                        if (os.startsWith("Windows")) {
+                            command = clipath + "/cli.cmd extract --s " + sourcePath + " --d " + destPath;
+                        } else if (os.startsWith("Linux")) {
+                            command = clipath + "/cli.sh extract --s " + sourcePath + " --d " + destPath;
                         }
-                    } catch (IOException | InterruptedException e) {
-                        e.printStackTrace();
+                        System.out.println("Extracting ");
+
                     }
-                    //                            String folderPath = downloadPath;
+
                     String folderPath = "";
                     if (suffix == null) {
-                        folderPath = downloadPath + "/" + vintage.get(0);
+                        folderPath = downloadPath + "/" + dir_name;
                     } else {
-                        folderPath = downloadPath + "/" + vintage.get(0) + "." + suffix;
+                        folderPath = downloadPath + "/" + dir_name + "." + suffix;
                     }
 
-                    String fileName = "name"; // replace with your file name
+                    String fileName = "name";
                     File filee = new File(fileName);
                     String nameWithoutExtension = "";
                     if (filee.getName().contains(".")) {
@@ -740,7 +755,7 @@ public class Application {
                         nameWithoutExtension = filee.getName();
                     }
 
-                    String fileN = nameWithoutExtension + ".txt"; // replace with desired file name
+                    String fileN = nameWithoutExtension + ".txt";
 
                     File folder1 = new File(folderPath);
                     File file = new File(folder1, fileN);
@@ -755,28 +770,34 @@ public class Application {
                 }
 
                 if (download) {
-                    System.out.println("Deleting spd file");
+                    if (clipath != null) {
+                        System.out.println("Deleting spd file");
 
-                    String dir_name = vintage.get(0);
-                    if (directoryName != null) {
-                        dir_name = directoryName;
-                    }
+                        String dir_name = vintage.get(0);
+                        if (directoryName != null) {
+                            dir_name = directoryName;
+                        }
 
-                    String directory = downloadPath + "/" + dir_name;
-                    File[] filess = Paths.get(directory).toFile().listFiles();
-                    if (filess != null) {
-                        for (File file : filess) {
-                            if (file.getName().endsWith(".spd")) {
-                                file.delete();
+                        String directory = null;
+
+                        if (suffix==null){
+                            directory = downloadPath + "/" + dir_name;
+                        }
+                        else{
+                            directory = downloadPath + "/" + dir_name + "." + suffix;
+                        }
+                        File[] files = Paths.get(directory).toFile().listFiles();
+
+                        if (files != null) {
+                            for (File file : files) {
+                                if (file.getName().endsWith(".spd")) {
+                                    file.delete();
+                                }
                             }
                         }
+                        Paths.get(directory).toFile().delete();
                     }
-                    Paths.get(directory).toFile().delete();
                 }
-
-//                else{
-//                    System.out.println("Data already exists: " + productName);
-//                }
             } else {
                 System.out.println("Incorrect data format: " + format);
             }
