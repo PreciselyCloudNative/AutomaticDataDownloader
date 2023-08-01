@@ -278,7 +278,7 @@ public class Application {
                 download(value, apiKey, secret, downloadPath, proxyInfo);
                 break;
             case "dldl":
-                downloadLatestDeliveryList(value, apiKey, secret, proxyInfo, downloadPath, directoryName, suffix, clipath, datavintage, hasHeader);
+                downloadLatestDeliveryList(value, apiKey, secret, proxyInfo, downloadPath, directoryName, suffix, datavintage, hasHeader);
                 break;
             case "dld":
                 downloadLatest(value, apiKey, secret, proxyInfo, downloadPath, credentials, bucketName, keyPostfix, hasHeader);
@@ -534,7 +534,7 @@ public class Application {
     }
 
     private void downloadLatestDeliveryList(String productInfo, final String apiKey, final String secret,
-                                            ProxyConnectionInfo proxyInfo, final String downloadPath, String directoryName, String suffix, String clipath,
+                                            ProxyConnectionInfo proxyInfo, final String downloadPath, String directoryName, String suffix,
                                             String datavintage, String hasHeader) throws DataDeliveryClientException, IOException, ArchiveException {
 
 
@@ -542,6 +542,8 @@ public class Application {
 
         final String[] products = productInfo.split(",");
         final String dataVintage = datavintage;
+
+        boolean download= true;
 
         for (int i = 0; i < products.length; i++) {
 
@@ -612,7 +614,6 @@ public class Application {
                 }
                 // downloading the latest vintage
                 else {
-                    System.out.println("data downloading");
                     // get the specified vintage Product info including delivery information available for download
                     dataDeliveriesSearchResult = client.getDeliveries(productName, pageNumber, rosterGranularity, geography);
                     if (dataDeliveriesSearchResult.getTotalDeliveries() > 0) {
@@ -633,7 +634,6 @@ public class Application {
                     vintage.add(dataVintage);
                 }
 
-                boolean download= true;
                 String productDirectory = "";
                 int fileIndex = 1;
 
@@ -655,14 +655,13 @@ public class Application {
                             checkFile = new File(downloadPath + "/" + productDirectory + "/" + dir_name+"."+suffix + "/" + fileName);
                         }
 
-                        System.out.println("name of dir"+ checkFile);
-
                         // Check if file already exists
                         if (checkFile.exists()) {
                             System.out.println("Data already exists: " +  productName);
+                            download= false;
                             continue;
                         }
-                        System.out.println(String.format("Downloading file %d of %d %s to %s", fileIndex, deliveryURLs.size(),
+                        System.out.println(String.format("Downloading file %d of %d %s to %s", i+1, products.length,
                                 fileName, downloadPath));
 
                         //creating subdirectories
@@ -681,7 +680,7 @@ public class Application {
                             directory_temp2.mkdir();
                         }
                         File directory_temp3 = Paths.get(directory_temp2.getPath(), fileName).toFile();
-                        System.out.println(directory_temp1);
+
                         try (final FileOutputStream fileOutput = new FileOutputStream(directory_temp3)) {
                             client.downloadProductFile(downloadUrl, fileOutput, (url, totalBytes, bytesDownloaded) -> {
                                 System.out.println(String.format("Progress for %s: %s%%", fileName,
@@ -705,102 +704,13 @@ public class Application {
                     }
                 }
 
-                if (download) {
-
-                    System.out.println("All downloads complete");
-
-                    String textfilepath = "";
-                    String dir_name = vintage.get(0);
-
-                    if (directoryName != null) {
-                        dir_name = directoryName;
-                    }
-
-                    String sourcePath = downloadPath + "/" + dir_name + "/";
-                    String destPath = "";
-                    if (suffix == null) {
-                        destPath = downloadPath + "/" + dir_name;
-                    } else {
-                        destPath = downloadPath + "/" + dir_name + "." + suffix;
-                    }
-
-                    String os = System.getProperty("os.name");
-
-                    String command ="";
-
-                    if (clipath!=null) {
-
-                        if (os.startsWith("Windows")) {
-                            command = clipath + "/cli.cmd extract --s " + sourcePath + " --d " + destPath;
-                        } else if (os.startsWith("Linux")) {
-                            command = clipath + "/cli.sh extract --s " + sourcePath + " --d " + destPath;
-                        }
-                        System.out.println("Extracting ");
-
-                    }
-
-                    String folderPath = "";
-                    if (suffix == null) {
-                        folderPath = downloadPath + "/" + dir_name;
-                    } else {
-                        folderPath = downloadPath + "/" + dir_name + "." + suffix;
-                    }
-
-                    String fileName = "name";
-                    File filee = new File(fileName);
-                    String nameWithoutExtension = "";
-                    if (filee.getName().contains(".")) {
-                        nameWithoutExtension = filee.getName().substring(0, filee.getName().lastIndexOf('.'));
-                    } else {
-                        nameWithoutExtension = filee.getName();
-                    }
-
-                    String fileN = nameWithoutExtension + ".txt";
-
-                    File folder1 = new File(folderPath);
-                    File file = new File(folder1, fileN);
-
-                    try {
-                        file.createNewFile();
-                        System.out.println("File created successfully at location: " + file.getAbsolutePath());
-                    } catch (IOException e) {
-                        System.out.println("An error occurred while creating the file.");
-                        e.printStackTrace();
-                    }
-                }
-
-                if (download) {
-                    if (clipath != null) {
-                        System.out.println("Deleting spd file");
-
-                        String dir_name = vintage.get(0);
-                        if (directoryName != null) {
-                            dir_name = directoryName;
-                        }
-
-                        String directory = null;
-
-                        if (suffix==null){
-                            directory = downloadPath + "/" + dir_name;
-                        }
-                        else{
-                            directory = downloadPath + "/" + dir_name + "." + suffix;
-                        }
-                        File[] files = Paths.get(directory).toFile().listFiles();
-
-                        if (files != null) {
-                            for (File file : files) {
-                                if (file.getName().endsWith(".spd")) {
-                                    file.delete();
-                                }
-                            }
-                        }
-                        Paths.get(directory).toFile().delete();
-                    }
-                }
             } else {
                 System.out.println("Incorrect data format: " + format);
             }
+        }
+
+        if (download) {
+            System.out.println("All downloads complete");
         }
     }
 
