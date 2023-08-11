@@ -642,12 +642,24 @@ public class Application {
                         final String fileName = downloadUrl.replaceAll(".*/(.+)\\?.*", "$1");
 
                         String dir_name = vintage.get(0);
+                        String[] d = dir_name.split("\\.");
+
+                        if(d.length == 2) {
+                            System.out.println("the array: " + d[0] + " " + d[1]);
+                            dir_name = d[1] + "_" + d[0];
+                        } else {
+                            // Handle cases where dir_name doesn't have exactly one dot.
+                            System.out.println("Unexpected format for dir_name: " + dir_name);
+                        }
+
+
 
                         if (directoryName != null) {
                             dir_name = directoryName;
                         }
 
                         File checkFile =null;
+
                         if (suffix==null){
                             checkFile = new File(downloadPath + "/" + productDirectory + "/" + dir_name + "/" + fileName);
                         }
