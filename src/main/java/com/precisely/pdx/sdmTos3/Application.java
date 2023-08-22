@@ -553,6 +553,7 @@ public class Application {
         final String dataVintage = datavintage;
         System.out.println("name :::" + directoryName);
 
+
         for (int i = 0; i < products.length; i++) {
 
             final List<String> deliveryURLs = new ArrayList<>();
@@ -655,7 +656,25 @@ public class Application {
                         final String fileName = downloadUrl.replaceAll(".*/(.+)\\?.*", "$1");
 
                         String textfilepath = "";
-                        String dir_name = vintage.get(0);
+                        String name_vintage = vintage.get(0);
+
+                        String[] parts = name_vintage.split("\\.");
+                        if (parts.length != 2) {
+                            System.out.println("Invalid vintage format");
+                            return;
+                        }
+
+                        int year = Integer.parseInt(parts[0]);
+                        int month = Integer.parseInt(parts[1]);
+
+                        // Format the year and month
+                        String dir_name = "";
+
+                        if (month >= 10 && month <= 12) {
+                            dir_name = year + "" + month;
+                        } else if (month >= 1 && month <= 9) {
+                            dir_name = year + "0" + month;
+                        }
 
                         if (directoryName != null) {
                             dir_name = directoryName;
@@ -743,7 +762,26 @@ public class Application {
                         System.out.println("All downloads complete");
 
 
-                        String dir_name = vintage.get(0);
+                        String name_vintage = vintage.get(0);
+
+                        String[] parts = name_vintage.split("\\.");
+                        if (parts.length != 2) {
+                            System.out.println("Invalid vintage format");
+                            return;
+                        }
+
+                        int year = Integer.parseInt(parts[0]);
+                        int month = Integer.parseInt(parts[1]);
+
+                        // Format the year and month
+                        String dir_name = "";
+
+                        if (month >= 10 && month <= 12) {
+                            dir_name = year + "" + month;
+                        } else if (month >= 1 && month <= 9) {
+                            dir_name = year + "0" + month;
+                        }
+
 
                         if (directoryName != null) {
                             dir_name = directoryName;
@@ -758,6 +796,8 @@ public class Application {
                             destPath = downloadPath + "/" + dir_name + "." + suffix;
                         }
 
+                        System.out.println("source path"+ sourcePath);
+                        System.out.println("dest path"+ destPath);
 
                         String os = System.getProperty("os.name");
 
@@ -809,7 +849,27 @@ public class Application {
                 if (download) {
                     System.out.println("Deleting spd file");
 
-                    String dir_name = vintage.get(0);
+                    String name_vintage = vintage.get(0);
+
+                    String[] parts = name_vintage.split("\\.");
+                    if (parts.length != 2) {
+                        System.out.println("Invalid vintage format");
+                        return;
+                    }
+
+                    int year = Integer.parseInt(parts[0]);
+                    int month = Integer.parseInt(parts[1]);
+
+                    // Format the year and month
+                    String dir_name = "";
+
+                    if (month >= 10 && month <= 12) {
+                        dir_name = year + "" + month;
+                    } else if (month >= 1 && month <= 9) {
+                        dir_name = year + "0" + month;
+                    }
+
+
                     if (directoryName != null) {
                         dir_name = directoryName;
                     }
