@@ -559,7 +559,6 @@ public class Application {
 
         final String[] products = productInfo.split(",");
         final String dataVintage = datavintage;
-        System.out.println("name :::" + directoryName);
 
 
         for (int i = 0; i < products.length; i++) {
@@ -694,7 +693,6 @@ public class Application {
                             textfilepath = downloadPath + "/" + dir_name + "." + suffix;
                         }
 
-                        System.out.println("textfile " + textfilepath);
 
 
 
@@ -844,9 +842,6 @@ public class Application {
                         } else {
                             destPath = downloadPath + "/" + dir_name + "." + suffix;
                         }
-
-                        System.out.println("source path"+ sourcePath);
-                        System.out.println("dest path"+ destPath);
 
                         String os = System.getProperty("os.name");
 
