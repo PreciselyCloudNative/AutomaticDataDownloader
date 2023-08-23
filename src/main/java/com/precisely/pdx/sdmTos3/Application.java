@@ -25,6 +25,14 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.BufferedReader;
+import java.io.FileReader;
+
 //import org.apache.hc.core5.net.URIBuilder;
 
 import java.net.http.HttpRequest;
@@ -688,28 +696,69 @@ public class Application {
 
                         System.out.println("textfile " + textfilepath);
 
-                        File folderY = new File(textfilepath);
-                        if (folderY.exists() && folderY.isDirectory()) {
-                            File[] files = folderY.listFiles();
-                            for (File file : files) {
 
-                                if (file.isFile()) {
 
-                                    String fname1 = file.getName();
-                                    File filee1 = new File(fname1);
-                                    String nameWithoutExtension1 = filee1.getName().substring(0, filee1.getName().lastIndexOf('.'));
 
-                                    String fname2 = fileName;
-                                    File filee2 = new File(fname2);
-                                    String nameWithoutExtension2 = filee2.getName().substring(0, filee2.getName().lastIndexOf('.'));
 
-                                    if (nameWithoutExtension1.equals(nameWithoutExtension2)) {
-                                        download = false;
-                                        break;
-                                    }
+
+
+
+                        String fp = textfilepath + "/metadata.txt"; // Replace with your file's actual path
+
+                        // Create a File object
+                        File f = new File(fp);
+
+                        Path path = Paths.get(fp);
+
+                        // Check if the file exists
+                        if (Files.exists(path)) {
+                            BufferedReader reader = new BufferedReader(new FileReader(fp));
+                            String line;
+                            boolean textFound = false;
+
+                            // Read the file line by line
+                            while ((line = reader.readLine()) != null) {
+                                if (line.contains(fileName)) {
+                                    textFound = true;
+                                    download = false;
+                                    System.out.println(fileName + "already exists"+ download);
+                                    break; // Exit the loop if the text is found
                                 }
                             }
+                            reader.close();
+                        } else {
+                            System.out.println("File does not exist. Creating it...");
+
                         }
+
+
+
+
+
+
+
+//                        File folderY = new File(textfilepath);
+//                        if (folderY.exists() && folderY.isDirectory()) {
+//                            File[] files = folderY.listFiles();
+//                            for (File file : files) {
+//
+//                                if (file.isFile()) {
+//
+//                                    String fname1 = file.getName();
+//                                    File filee1 = new File(fname1);
+//                                    String nameWithoutExtension1 = filee1.getName().substring(0, filee1.getName().lastIndexOf('.'));
+//
+//                                    String fname2 = fileName;
+//                                    File filee2 = new File(fname2);
+//                                    String nameWithoutExtension2 = filee2.getName().substring(0, filee2.getName().lastIndexOf('.'));
+//
+//                                    if (nameWithoutExtension1.equals(nameWithoutExtension2)) {
+//                                        download = false;
+//                                        break;
+//                                    }
+//                                }
+//                            }
+//                        }
 
                         if (download) {
                             name = fileName;
@@ -828,22 +877,50 @@ public class Application {
                             folderPath = downloadPath + "/" + dir_name + "." + suffix;
                         }
 
-                        String fileName = name;
-                        File filee = new File(fileName);
-                        String nameWithoutExtension = filee.getName().substring(0, filee.getName().lastIndexOf('.'));
+                        String fp = folderPath + "/metadata.txt"; // Replace with your file's actual path
 
-                        String fileN = nameWithoutExtension + ".txt";
+                        // Create a File object
+                        File f = new File(fp);
 
-                        File folder1 = new File(folderPath);
-                        File file = new File(folder1, fileN);
+                        Path path = Paths.get(fp);
 
                         try {
-                            file.createNewFile();
-                            System.out.println("File created successfully at location: " + file.getAbsolutePath());
+                            if (!Files.exists(path)) {
+                                // Create the file
+                                Files.createFile(path);
+                                System.out.println("File created successfully.");
+                            }
+
+                            // Open the file in append mode
+                            BufferedWriter writer = new BufferedWriter(new FileWriter(fp, true));
+
+                            // Write data to the file
+                            writer.newLine(); // Start a new line
+                            writer.write(name);
+                            System.out.println("Text added to the file.");
+
+                            // Close the writer
+                            writer.close();
                         } catch (IOException e) {
-                            System.out.println("An error occurred while creating the file.");
-                            e.printStackTrace();
+                            System.err.println("An error occurred: " + e.getMessage());
                         }
+//
+//                        String fileName = name;
+//                        File filee = new File(fileName);
+//                        String nameWithoutExtension = filee.getName().substring(0, filee.getName().lastIndexOf('.'));
+//
+//                        String fileN = nameWithoutExtension + ".txt";
+//
+//                        File folder1 = new File(folderPath);
+//                        File file = new File(folder1, fileN);
+//
+//                        try {
+//                            file.createNewFile();
+//                            System.out.println("File created successfully at location: " + file.getAbsolutePath());
+//                        } catch (IOException e) {
+//                            System.out.println("An error occurred while creating the file.");
+//                            e.printStackTrace();
+//                        }
                     }
                 }
                 if (download) {
