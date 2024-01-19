@@ -78,12 +78,12 @@ class ApacheCLIUtility {
                 .hasArg().build();
         options.addOption(downloadLatestDelivery);
 
-        Option downloadLatestDeliveryList = Option.builder("dldl")
+        Option downloadReferentialData= Option.builder("drd")
                 .argName("productName#geography#roster-granularity#format")
                 .required(false).longOpt("download-latest-delivery-list")
                 .desc("The option takes an argument which is composed of productName and format separated by #.")
                 .hasArg().build();
-        options.addOption(downloadLatestDeliveryList);
+        options.addOption(downloadReferentialData);
 
         Option downloadPath = Option.builder("d").argName("download-path").required(false).longOpt("download-path")
                 .desc("The takes an argument which is folder location to download delivery. If not provided then Downloads folder is used in user's home directory")
@@ -126,6 +126,10 @@ class ApacheCLIUtility {
         Option datavintage = Option.builder("dv").argName("datavintage").longOpt("data-vintage")
                 .desc("Your datavintage for the product.").hasArg().required(false).build();
         options.addOption(datavintage);
+
+        Option dataversion = Option.builder("version").argName("dataversion").longOpt("data-version")
+                .desc("Your dataversion for the product.").hasArg().required(false).build();
+        options.addOption(dataversion);
 
         Option clipath = Option.builder("cli").argName("cli-path").required(false).longOpt("cli-path")
                 .desc("The takes an argument which is folder location to cli directory.")

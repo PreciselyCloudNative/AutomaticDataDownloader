@@ -93,15 +93,15 @@ convertToParquet (boolean) - Decompress all zip files from downloaded data and c
 download latest delivery  
 `-dld "productName#geography#rosterGranularity#dataFormat" -a <apiKey> -s <secret> --download-path <c:\downloads\> --s3-access <s3-access-key> --s3-secret <s3-secret key> --s3-bucket-name <s3-bucket-name> --s3-key-postfix <postfix>`
 
-download latest delivery list 
+download referential data 
 
-`-dldl "productName#geography#rosterGranularity#dataFormat" -a <apiKey> -s <secret> --download-path <c:\downloads\>  --s3-access <s3-access-key> --d  --suffix  --cli  --dv  --directoryName`
+`-drd "productName#geography#rosterGranularity#dataFormat" -a <apiKey> -s <secret> --download-path <c:\downloads\>  --s3-access <s3-access-key> --d  --suffix  --cli  --dv  --directoryName`
 
 ## Architecture
 
 ### 1. Download Latest Delivery (DLD)
 
-Download latest deliver command will download the latest vintage precisely has to offer for the requested product. </br>
+Download latest deliver command will download the latest vintage precisely has to offer for the requested product list . </br>
 #### The arguments are as follows:
 
 1. jar file location  
@@ -128,14 +128,14 @@ Download latest deliver command will download the latest vintage precisely has t
 ![DLD_working_Final](https://user-images.githubusercontent.com/30530766/162287652-bfaebc7d-0343-4ca4-bc33-7c572a090455.jpg)
 
 
-### 2. Download Latest Delivery List (DLDL)
+### 2. Download Referential Data (DRD)
 
 Download latest deliver list command will download the latest vintage precisely has to offer for the requested product list and also extract the data. </br>
 #### The arguments are as follows:
 
 1. jar file location  
    Example: `java -jar "C:\DataDownloader\build\libs\data-downloader-3.0.3-all.jar"`
-2. `-dldl` : Download latest Delivery list
+2. `--drd` : Download Referential Data
 3. Name of product you want to download (as a string seperated by #)  
    Example: `"productName#geography#roster-granularity#format"`  
    i. productName : Name of the product. Example: Genealogy Parent-Child Data US  

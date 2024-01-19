@@ -32,6 +32,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.BufferedReader;
 import java.io.FileReader;
+//import software.amazon.awssdk.regions.Region;
 
 //import org.apache.hc.core5.net.URIBuilder;
 
@@ -109,17 +110,17 @@ public class Application {
                 }
             }
             if ((commandLine.hasOption("lp") && !commandLine.hasOption("ld") && !commandLine.hasOption("lld")
-                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld") && !commandLine.hasOption("dldl"))
+                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld") && !commandLine.hasOption("drd"))
                     || (!commandLine.hasOption("lp") && commandLine.hasOption("ld") && !commandLine.hasOption("lld")
-                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld") && !commandLine.hasOption("dldl"))
+                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld") && !commandLine.hasOption("drd"))
                     || (!commandLine.hasOption("lp") && !commandLine.hasOption("ld") && commandLine.hasOption("lld")
-                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld") && !commandLine.hasOption("dldl"))
+                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld") && !commandLine.hasOption("drd"))
                     || (!commandLine.hasOption("lp") && !commandLine.hasOption("ld") && !commandLine.hasOption("lld")
-                    && commandLine.hasOption("dd") && !commandLine.hasOption("dld") && !commandLine.hasOption("dldl"))
+                    && commandLine.hasOption("dd") && !commandLine.hasOption("dld") && !commandLine.hasOption("drd"))
                     || (!commandLine.hasOption("lp") && !commandLine.hasOption("ld") && !commandLine.hasOption("lld")
-                    && !commandLine.hasOption("dd") && commandLine.hasOption("dld") && !commandLine.hasOption("dldl"))
+                    && !commandLine.hasOption("dd") && commandLine.hasOption("dld") && !commandLine.hasOption("drd"))
                     || (!commandLine.hasOption("lp") && !commandLine.hasOption("ld") && !commandLine.hasOption("lld")
-                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld") && commandLine.hasOption("dldl"))) {
+                    && !commandLine.hasOption("dd") && !commandLine.hasOption("dld") && commandLine.hasOption("drd"))) {
                 if (commandLine.hasOption("a") && commandLine.hasOption("s")) {
                     apiKey = commandLine.getOptionValue("a");
                     secret = commandLine.getOptionValue("s");
@@ -152,9 +153,9 @@ public class Application {
                         if (commandLine.hasOption("hh")) {
                             hasHeader = commandLine.getOptionValue("hh");
                         }
-                    } else if (commandLine.hasOption("dldl")) {
-                        command = "dldl";
-                        value = commandLine.getOptionValue("dldl");
+                    } else if (commandLine.hasOption("drd")) {
+                        command = "drd";
+                        value = commandLine.getOptionValue("drd");
 
                         if (commandLine.hasOption("suffix")) {
                             suffix = commandLine.getOptionValue("suffix");
@@ -283,8 +284,8 @@ public class Application {
             case "dd":
                 download(value, apiKey, secret, downloadPath, proxyInfo);
                 break;
-            case "dldl":
-                downloadLatestDeliveryList(value, apiKey, secret, proxyInfo, downloadPath, directoryName, suffix, clipath, datavintage, hasHeader);
+            case "drd":
+                downloadReferentialData(value, apiKey, secret, proxyInfo, downloadPath, directoryName, suffix, clipath, datavintage, hasHeader);
                 break;
             case "dld":
                 downloadLatest(value, apiKey, secret, proxyInfo, downloadPath, credentials, bucketName, keyPostfix, hasHeader);
@@ -407,160 +408,9 @@ public class Application {
                                 ProxyConnectionInfo proxyInfo, final String downloadPath,
                                 BasicAWSCredentials credentials, final String bucketName,
                                 final String keyPostfix, String hasHeader) throws DataDeliveryClientException, IOException, ArchiveException {
-        final List<String> deliveryURLs = new ArrayList<>();
-        final List<String> vintage = new ArrayList<>();
-        final String[] pieces = productInfo.split("#");
-        int pageNumber = 1;
-        String productName = null;
-        String geography = null;
-        String rosterGranularity = null;
-        boolean convert = true;
-        boolean saveToS3 = true;
-        final String format;
-        if (pieces.length == 4) {
-            productName = pieces[0];
-            geography = pieces[1];
-            rosterGranularity = pieces[2];
-            format = pieces[3];
-        } else if (pieces.length == 5) {
-            productName = pieces[0];
-            geography = pieces[1];
-            rosterGranularity = pieces[2];
-            format = pieces[3];
-            saveToS3 = parseBoolean(pieces[4]);
-        } else if (pieces.length == 6) {
-            productName = pieces[0];
-            geography = pieces[1];
-            rosterGranularity = pieces[2];
-            format = pieces[3];
-            saveToS3 = parseBoolean(pieces[4]);
-            convert = parseBoolean(pieces[5]);
-        } else {
-            format = null;
-            System.out.println("The argument value provided  for lld should be proper.");
-            System.out.println(
-                    "The lld option takes an argument which is composed of productName, geography and roster granularity and userPreference separated by #.");
-            exit(0);
-        }
-        DataDeliveriesSearchResult dataDeliveriesSearchResult;
-        DataDeliveryClient client = null;
-        if (null != proxyInfo) {
-            client = new DataDeliveryClient(apiKey, secret, APP_ID, proxyInfo.getProxyUrl(), proxyInfo.getUserName(),
-                    proxyInfo.getPassword());
-        } else {
-            client = new DataDeliveryClient(apiKey, secret, APP_ID);
-        }
-
-        // get the Latest Product info including delivery information available for download
-        dataDeliveriesSearchResult = client.getLatestDeliveries(productName, pageNumber, rosterGranularity, geography);
-        if (dataDeliveriesSearchResult.getTotalDeliveries() > 0) {
-            dataDeliveriesSearchResult.getDeliveries().forEach(
-                    deliveryInfo -> {
-                        if (deliveryInfo.getDataFormat().equalsIgnoreCase(format)) {
-                            if (deliveryInfo.getDownloadUrl() != null && !"".equalsIgnoreCase(deliveryInfo.getDownloadUrl()))
-                                deliveryURLs.add(deliveryInfo.getDownloadUrl());
-                            vintage.add(deliveryInfo.getVintage());
-//                            vintage[0] = deliveryInfo.getVintage();
-                        }
-                    }
-            );
-        } else {
-            System.out.println("Product Latest Info is not available");
-            exit(0);
-        }
-        String productDirectory = productName.replace("_", "-").replace(" ", "-").replace("&", "-and-").replace(":", "-").replace("--", "-").toUpperCase();
-        String urlPostfix = keyPostfix + productDirectory + "/" + vintage.get(0);
-        if (format.equalsIgnoreCase("Spectrum Platform Data") || format.equalsIgnoreCase("Geocoding")
-                || format.equalsIgnoreCase("Interactive")) {
-            productDirectory = "reference-data";
-            urlPostfix = keyPostfix + productDirectory + "/" + vintage.get(0) + "/" + deliveryURLs.get(0).replaceAll(".*/(.+)\\?.*", "$1");
-        }
-        int fileIndex = 1;
-        if (deliveryURLs.size() > 0) {
-//             download the files
-            for (final String downloadUrl : deliveryURLs) {
-                final String fileName = downloadUrl.replaceAll(".*/(.+)\\?.*", "$1");
-                if (checkDir(bucketName, urlPostfix, credentials)) {
-                    System.out.println(String.format("Downloading file %d of %d %s to %s", fileIndex, deliveryURLs.size(),
-                            fileName, downloadPath));
-                    //creating sub directories
-
-                    File directory_temp1 = Paths.get(downloadPath, productDirectory).toFile();
-                    if (!directory_temp1.exists()) {
-                        directory_temp1.mkdir();
-                    }
-                    File directory_temp2 = Paths.get(directory_temp1.getPath(), vintage.get(0)).toFile();
-                    if (!directory_temp2.exists()) {
-                        directory_temp2.mkdir();
-                    }
-                    File directory_temp3 = Paths.get(directory_temp2.getPath(), fileName).toFile();
-                    System.out.println(directory_temp1);
-                    // create the file output stream.......Add checkdir checkpoint here
-                    try (final FileOutputStream fileOutput = new FileOutputStream(directory_temp3)) {
-                        // call the SDK to download the file
-                        client.downloadProductFile(downloadUrl, fileOutput, (url, totalBytes, bytesDownloaded) -> {
-                            System.out.println(String.format("Progress for %s: %s%%", fileName,
-                                    Math.round((float) bytesDownloaded / totalBytes * 100)));
-                            return true;
-                        }, (url, totalBytes, bytesDownloaded) -> {
-                            while (bytesDownloaded != totalBytes) {
-                                continue;
-                            }
-                            if (totalBytes == bytesDownloaded) {
-                                System.out.println("Complete Callback is done.");
-                                return true;
-                            }
-                            return false;
-                        });
-
-                        System.out.println(String.format("Progress for %s: %s%%", fileName, "100"));
-                    } catch (final Exception ex) {
-                        System.out.println("An error occurred saving the file.");
-                    }
-
-                    fileIndex++;
-
-                } else {
-                    System.out.println("Data set already exists");
-                    exit(0);
-                }
-            }
-
-            boolean itr = true;
-            decompressAndConvert(Paths.get(downloadPath).toFile(), itr, convert, hasHeader);
-            if (table.size() != 0) {
-                for (File t : table) {
-                    itr = false;
-                    decompressAndConvert(t, itr, convert, hasHeader);
-                }
-            }
-            System.out.println("All downloads complete");
-            if (saveToS3) {
-                createBucket(bucketName, credentials); //fix arguments
-                uploadDir(downloadPath, bucketName, keyPostfix, true, credentials);
-            }
-        } else {
-            System.out.println("No delivery is found with provided arguments.");
-        }
-        if (saveToS3) {
-            File[] files = Paths.get(downloadPath).toFile().listFiles();
-            for (File f : files) {
-                FileUtils.deleteDirectory(f);
-            }
-        }
-    }
-
-    private void downloadLatestDeliveryList(String productInfo, final String apiKey, final String secret,
-                                            ProxyConnectionInfo proxyInfo, final String downloadPath, String directoryName, String suffix, String clipath,
-                                            String datavintage, String hasHeader) throws DataDeliveryClientException, IOException, ArchiveException {
-
-
-        HashMap<String, String> datamap = new HashMap<>();
 
         final String[] products = productInfo.split(",");
-        final String dataVintage = datavintage;
-
-
+//
         for (int i = 0; i < products.length; i++) {
 
             final List<String> deliveryURLs = new ArrayList<>();
@@ -607,6 +457,157 @@ public class Application {
                 client = new DataDeliveryClient(apiKey, secret, APP_ID);
             }
 
+            // get the Latest Product info including delivery information available for download
+            dataDeliveriesSearchResult = client.getLatestDeliveries(productName, pageNumber, rosterGranularity, geography);
+            if (dataDeliveriesSearchResult.getTotalDeliveries() > 0) {
+                dataDeliveriesSearchResult.getDeliveries().forEach(
+                        deliveryInfo -> {
+                            if (deliveryInfo.getDataFormat().equalsIgnoreCase(format)) {
+                                if (deliveryInfo.getDownloadUrl() != null && !"".equalsIgnoreCase(deliveryInfo.getDownloadUrl()))
+                                    deliveryURLs.add(deliveryInfo.getDownloadUrl());
+                                vintage.add(deliveryInfo.getVintage());
+                                //                            vintage[0] = deliveryInfo.getVintage();
+                            }
+                        }
+                );
+            } else {
+                System.out.println("Product Latest Info is not available");
+                exit(0);
+            }
+            String productDirectory = productName.replace("_", "-").replace(" ", "-").replace("&", "-and-").replace(":", "-").replace("--", "-").toUpperCase();
+            String urlPostfix = keyPostfix + productDirectory + "/" + vintage.get(0);
+            if (format.equalsIgnoreCase("Spectrum Platform Data") || format.equalsIgnoreCase("Geocoding")
+                    || format.equalsIgnoreCase("Interactive")) {
+                productDirectory = "reference-data";
+                urlPostfix = keyPostfix + productDirectory + "/" + vintage.get(0) + "/" + deliveryURLs.get(0).replaceAll(".*/(.+)\\?.*", "$1");
+            }
+            int fileIndex = 1;
+            if (deliveryURLs.size() > 0) {
+                //             download the files
+                for (final String downloadUrl : deliveryURLs) {
+                    final String fileName = downloadUrl.replaceAll(".*/(.+)\\?.*", "$1");
+                    if (checkDir(bucketName, urlPostfix, credentials)) {
+                        System.out.println(String.format("Downloading file %d of %d %s to %s", fileIndex, deliveryURLs.size(),
+                                fileName, downloadPath));
+                        //creating sub directories
+
+                        File directory_temp1 = Paths.get(downloadPath, productDirectory).toFile();
+                        if (!directory_temp1.exists()) {
+                            directory_temp1.mkdir();
+                        }
+                        File directory_temp2 = Paths.get(directory_temp1.getPath(), vintage.get(0)).toFile();
+                        if (!directory_temp2.exists()) {
+                            directory_temp2.mkdir();
+                        }
+                        File directory_temp3 = Paths.get(directory_temp2.getPath(), fileName).toFile();
+                        System.out.println(directory_temp1);
+                        // create the file output stream.......Add checkdir checkpoint here
+                        try (final FileOutputStream fileOutput = new FileOutputStream(directory_temp3)) {
+                            // call the SDK to download the file
+                            client.downloadProductFile(downloadUrl, fileOutput, (url, totalBytes, bytesDownloaded) -> {
+                                System.out.println(String.format("Progress for %s: %s%%", fileName,
+                                        Math.round((float) bytesDownloaded / totalBytes * 100)));
+                                return true;
+                            }, (url, totalBytes, bytesDownloaded) -> {
+                                while (bytesDownloaded != totalBytes) {
+                                    continue;
+                                }
+                                if (totalBytes == bytesDownloaded) {
+                                    System.out.println("Complete Callback is done.");
+                                    return true;
+                                }
+                                return false;
+                            });
+
+                            System.out.println(String.format("Progress for %s: %s%%", fileName, "100"));
+                        } catch (final Exception ex) {
+                            System.out.println("An error occurred saving the file.");
+                        }
+
+                        fileIndex++;
+
+                    } else {
+                        System.out.println("Data set already exists");
+                        exit(0);
+                    }
+                }
+
+                boolean itr = true;
+                decompressAndConvert(Paths.get(downloadPath).toFile(), itr, convert, hasHeader);
+                if (table.size() != 0) {
+                    for (File t : table) {
+                        itr = false;
+                        decompressAndConvert(t, itr, convert, hasHeader);
+                    }
+                }
+                System.out.println("All downloads complete");
+                if (saveToS3) {
+                    createBucket(bucketName, credentials); //fix arguments
+                    uploadDir(downloadPath, bucketName, keyPostfix, true, credentials);
+                }
+            } else {
+                System.out.println("No delivery is found with provided arguments.");
+            }
+            if (saveToS3) {
+                File[] files = Paths.get(downloadPath).toFile().listFiles();
+                for (File f : files) {
+                    FileUtils.deleteDirectory(f);
+                }
+            }
+        }
+    }
+
+    private void downloadReferentialData(String productInfo, final String apiKey, final String secret,
+                                            ProxyConnectionInfo proxyInfo, final String downloadPath, String directoryName, String suffix, String clipath,
+                                            String datavintage,  String hasHeader) throws DataDeliveryClientException, IOException, ArchiveException {
+
+
+        HashMap<String, String> datamap = new HashMap<>();
+
+        final String[] products = productInfo.split(",");
+        final String dataVintage = datavintage;
+
+
+
+        for (int i = 0; i < products.length; i++) {
+
+            final List<String> deliveryURLs = new ArrayList<>();
+            final List<String> vintage = new ArrayList<>();
+//            final List<String> vintage = new ArrayList<>();
+            final String[] pieces = products[i].split("#");
+            int pageNumber = 1;
+            String productName = null;
+            String geography = null;
+            String rosterGranularity = null;
+            String version = null;
+            final String format;
+            if (pieces.length == 4) {
+                productName = pieces[0];
+                geography = pieces[1];
+                rosterGranularity = pieces[2];
+                format = pieces[3];
+            } else if (pieces.length == 5) {
+                productName = pieces[0];
+                geography = pieces[1];
+                rosterGranularity = pieces[2];
+                format = pieces[3];
+                version = pieces[4];
+            }  else {
+                format = null;
+                System.out.println("The argument value provided  for lld should be proper.");
+                System.out.println(
+                        "The lld option takes an argument which is composed of productName, geography and roster granularity and userPreference separated by #.");
+                exit(0);
+            }
+            DataDeliveriesSearchResult dataDeliveriesSearchResult;
+            DataDeliveryClient client = null;
+            if (null != proxyInfo) {
+                client = new DataDeliveryClient(apiKey, secret, APP_ID, proxyInfo.getProxyUrl(), proxyInfo.getUserName(),
+                        proxyInfo.getPassword());
+            } else {
+                client = new DataDeliveryClient(apiKey, secret, APP_ID);
+            }
+
             if (format.equalsIgnoreCase("Spectrum Platform Data") || format.equalsIgnoreCase("Geocoding")
                     || format.equalsIgnoreCase("Interactive")) {
 
@@ -621,6 +622,7 @@ public class Application {
                                         if (deliveryInfo.getDownloadUrl() != null && !"".equalsIgnoreCase(deliveryInfo.getDownloadUrl()))
                                         deliveryURLs.add(deliveryInfo.getDownloadUrl());
                                         vintage.add(deliveryInfo.getVintage());
+//                                        version.add
                                     }
                                 }
                         );
