@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1bff8fee-ca7c-4ffa-ac48-9691ea172e5b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="1bff8fee-ca7c-4ffa-ac48-9691ea172e5b" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -72,7 +68,6 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="com.precisely.pdx.sdmTos3.Application" />
       <module name="data-downloader.main" />
-      <option name="PROGRAM_PARAMETERS" value="-dld &quot;Geocoding Residential Delivery Indicator#United States#All USA#Spectrum platform Data,Geocoding LACSLink Database#United States#All USA#Spectrum platform Data&quot; -a nGol6ujgMAE6PEBBKiQgCeLmFtMfEY9p -s banVAoGMbAdOf5zs -d C:\DLD-savetos3 -s3a AKIAQKSZJUOUTLAJMEFQ -s3s vNI3n32YOornJkpxqPrgC02XYPYdKQgi8F4IUemH -s3bucket sales-tim-mckenzie -s3post Projects/Individuals/Tanha/datadownloadertest/" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
