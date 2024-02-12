@@ -559,14 +559,13 @@ public class Application {
 
     private void downloadReferentialData(String productInfo, final String apiKey, final String secret,
                                             ProxyConnectionInfo proxyInfo, final String downloadPath, String directoryName, String suffix, String clipath,
-                                            String datavintage,  String hasHeader) throws DataDeliveryClientException, IOException, ArchiveException {
+                                            String datavintage, String hasHeader) throws DataDeliveryClientException, IOException, ArchiveException {
 
 
         HashMap<String, String> datamap = new HashMap<>();
 
         final String[] products = productInfo.split(",");
         final String dataVintage = datavintage;
-
 
 
         for (int i = 0; i < products.length; i++) {
@@ -579,9 +578,10 @@ public class Application {
             String productName = null;
             String geography = null;
             String rosterGranularity = null;
-            String version = null;
+            String version;
             final String format;
             if (pieces.length == 4) {
+                version = null;
                 productName = pieces[0];
                 geography = pieces[1];
                 rosterGranularity = pieces[2];
@@ -593,6 +593,7 @@ public class Application {
                 format = pieces[3];
                 version = pieces[4];
             }  else {
+                version = null;
                 format = null;
                 System.out.println("The argument value provided  for lld should be proper.");
                 System.out.println(
@@ -611,7 +612,7 @@ public class Application {
             if (format.equalsIgnoreCase("Spectrum Platform Data") || format.equalsIgnoreCase("Geocoding")
                     || format.equalsIgnoreCase("Interactive")) {
 
-                if (datavintage == null) {
+                if (datavintage == null && version == null) {
                     System.out.println("data downloading");
                     // get the Latest Product info including delivery information available for download
                     dataDeliveriesSearchResult = client.getLatestDeliveries(productName, pageNumber, rosterGranularity, geography);
@@ -622,7 +623,7 @@ public class Application {
                                         if (deliveryInfo.getDownloadUrl() != null && !"".equalsIgnoreCase(deliveryInfo.getDownloadUrl()))
                                         deliveryURLs.add(deliveryInfo.getDownloadUrl());
                                         vintage.add(deliveryInfo.getVintage());
-//                                        version.add
+
                                     }
                                 }
                         );
@@ -630,7 +631,8 @@ public class Application {
                         System.out.println("Product Latest Info is not available");
                         exit(0);
                     }
-                } else {
+                }
+                else if(datavintage != null && version == null) {
                     System.out.println(dataVintage + " vintage downloading");
                     // get the specified vintage Product info including delivery information available for download
                     dataDeliveriesSearchResult = client.getDeliveries(productName, pageNumber, rosterGranularity, geography);
@@ -638,6 +640,31 @@ public class Application {
                         dataDeliveriesSearchResult.getDeliveries().forEach(
                                 deliveryInfo -> {
                                     if (deliveryInfo.getDataFormat().equalsIgnoreCase(format) && deliveryInfo.getVintage().equalsIgnoreCase(dataVintage)) {
+                                        if (deliveryInfo.getDownloadUrl() != null && !"".equalsIgnoreCase(deliveryInfo.getDownloadUrl()))
+                                            deliveryURLs.add(deliveryInfo.getDownloadUrl());
+                                        vintage.add(deliveryInfo.getVintage());
+                                    }
+                                }
+                        );
+                    } else {
+                        System.out.println("Product's vintage " + dataVintage + " info is not available");
+                        exit(0);
+                    }
+                    vintage.add(dataVintage);
+                }
+                else if(datavintage == null && version != null) {
+
+                        System.out.println("Specify vintage");
+                        exit(0);
+                }
+                else {
+                    System.out.println(dataVintage + " vintage downloading");
+                    // get the specified vintage Product info including delivery information available for download
+                    dataDeliveriesSearchResult = client.getDeliveries(productName, pageNumber, rosterGranularity, geography);
+                    if (dataDeliveriesSearchResult.getTotalDeliveries() > 0) {
+                        dataDeliveriesSearchResult.getDeliveries().forEach(
+                                deliveryInfo -> {
+                                    if (deliveryInfo.getDataFormat().equalsIgnoreCase(format) && deliveryInfo.getVintage().equalsIgnoreCase(dataVintage)&& deliveryInfo.getVersion().equals(version)) {
                                         if (deliveryInfo.getDownloadUrl() != null && !"".equalsIgnoreCase(deliveryInfo.getDownloadUrl()))
                                             deliveryURLs.add(deliveryInfo.getDownloadUrl());
                                             vintage.add(deliveryInfo.getVintage());
@@ -694,11 +721,6 @@ public class Application {
                         } else {
                             textfilepath = downloadPath + "/" + dir_name + "." + suffix;
                         }
-
-
-
-
-
 
 
 

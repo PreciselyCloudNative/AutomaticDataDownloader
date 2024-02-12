@@ -127,10 +127,6 @@ class ApacheCLIUtility {
                 .desc("Your datavintage for the product.").hasArg().required(false).build();
         options.addOption(datavintage);
 
-        Option dataversion = Option.builder("version").argName("dataversion").longOpt("data-version")
-                .desc("Your dataversion for the product.").hasArg().required(false).build();
-        options.addOption(dataversion);
-
         Option clipath = Option.builder("cli").argName("cli-path").required(false).longOpt("cli-path")
                 .desc("The takes an argument which is folder location to cli directory.")
                 .hasArg().build();
