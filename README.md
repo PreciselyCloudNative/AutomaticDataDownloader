@@ -95,7 +95,7 @@ download latest delivery
 
 download referential data 
 
-`-drd "productName#geography#rosterGranularity#dataFormat" -a <apiKey> -s <secret> --download-path <c:\downloads\>  --s3-access <s3-access-key> --d  --suffix  --cli  --dv  --directoryName`
+`-drd "productName#geography#rosterGranularity#dataFormat#version" -a <apiKey> -s <secret> --download-path <c:\downloads\>  --s3-access <s3-access-key> --d  --suffix  --cli  --dv  --directoryName`
 
 ## Architecture
 
@@ -137,11 +137,13 @@ Download latest deliver list command will download the latest vintage precisely 
    Example: `java -jar "C:\DataDownloader\build\libs\data-downloader-3.0.3-all.jar"`
 2. `--drd` : Download Referential Data
 3. Name of product you want to download (as a string seperated by #)  
-   Example: `"productName#geography#roster-granularity#format"`  
+   Example: `"productName#geography#roster-granularity#format#version"`  
    i. productName : Name of the product. Example: Genealogy Parent-Child Data US  
    ii. geaography : The geographic region or extent of the product. Example: United States  
    iii. roster-granularity : The aggregate at which the data is stored in the file. Example: All USA
    iv. Format : file format in which you want downloaded data. Example: CSV
+
+    v. Version : Version of the data you want to download. Example: 1.0.0
 
     Multiple products you want to download( as a string seperated by ,)    
    Example: `"productName1#geography1#roster-granularity1#format1,productName2#geography2#roster-granularity2#format2"`
@@ -154,7 +156,7 @@ Download latest deliver list command will download the latest vintage precisely 
 9. `-dv` : vintage you want to download for the products
 10. `-directoryName` : name of the directory where you want to download the products
 
-#### The below diagram shows the working of DLDL:
+#### The below diagram shows the working of DRD:
 
 ![dldl](https://github.com/PreciselyCloudNative/AutomaticDataDownloader/assets/86220719/da4f04be-1886-453b-8f7d-64701c443c86)
 
