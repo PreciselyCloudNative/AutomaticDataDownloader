@@ -23,12 +23,7 @@
       <state>
         <projects_view>
           <tree_state>
-            <expand>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="data-downloader" type="f1a62948:ProjectNode" />
-              </path>
-            </expand>
+            <expand />
             <select />
           </tree_state>
         </projects_view>
@@ -49,29 +44,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Application.executor": "Coverage",
-    "Gradle.AutomaticDataDownloader [:Application.main()].executor": "Run",
-    "Gradle.Build AutomaticDataDownloader.executor": "Run",
-    "Gradle.Upgrade Gradle wrapper.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "download-latest-delivery-list",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/tanha.talavia/AutomaticDataDownloader",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.0"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Application.executor&quot;: &quot;Coverage&quot;,
+    &quot;Gradle.AutomaticDataDownloader [:Application.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build AutomaticDataDownloader.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Upgrade Gradle wrapper.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;download-latest-delivery-list&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/tanha.talavia/AutomaticDataDownloader&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="Application" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="ALTERNATIVE_JRE_PATH" value="21" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="com.precisely.pdx.sdmTos3.Application" />
       <module name="data-downloader.main" />
-      <option name="PROGRAM_PARAMETERS" value="-drd &quot;Geocoding Residential Delivery Indicator#United States#All USA#Spectrum platform Data#1.0.0,Geocoding LACSLink Database#United States#All USA#Spectrum platform Data&quot; -a nGol6ujgMAE6PEBBKiQgCeLmFtMfEY9p -s banVAoGMbAdOf5zs -d C:\DLD-Vintage -cli C:\ga-sdk-dist-5.1.164\cli -directoryName Tanha -dv 2023.1" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>

@@ -32,68 +32,71 @@ Example:
 
 ## Commands and Options
 
-list products
+1. <u>**list products</u> :**
 
 `-lp -a <apiKey> -s <secret>`
 
-list products with proxy configuration information without username and password
+2. <u>**list products with proxy configuration information without username and password</u> :**
 
 `-lp -a <apiKey> -s <secret> -c<https://myproxyServer.com:8080>`
 
-list products with proxy configuration information having username and password
+3. <u>**list products with proxy configuration information having username and password</u> :**
 
 `-lp -a <apiKey> -s <secret> -c<https://myproxyServer.com:8080> -u <username> -p <password>`
 
-list deliveries
+4. <u>**list deliveries</u> :**
 
 `-ld "productName#geography#rosterGranularity#minReleaseDate" -a <apiKey> -s <secret>`
 
-list deliveries with proxy configuration information without username and password
+5. <u>**list deliveries with proxy configuration information without username and password</u> :**
 
 `-ld "productName#geography#rosterGranularity#minReleaseDate" -a <apiKey> -s <secret> -c<https://myproxyServer.com:8080>`
 
-list deliveries with proxy configuration information having username and password
+6. <u>**list deliveries with proxy configuration information having username and password</u> :**
 
 `-ld "productName#geography#rosterGranularity#minReleaseDate" -a <apiKey> -s <secret> -c<https://myproxyServer.com:8080> -u <username> -p <password>`
 
-list latest deliveries
+7. <u>**list latest deliveries</u> :**
 
 `-lld "productName#geography#rosterGranularity#userPreference" -a <apiKey> -s <secret>`
 
-list the latest deliveries with proxy configuration information without username and password
+8. <u>**list the latest deliveries with proxy configuration information without username and password</u> :**
 
 `-lld "productName#geography#rosterGranularity#userPreference" -a <apiKey> -s <secret> -c<https://myproxyServer.com:8080>`
 
-list the latest deliveries with proxy configuration information having username and password
+9. <u>**list the latest deliveries with proxy configuration information having username and password</u> :**
 
 `-lld "productName#geography#rosterGranularity#userPreference" -a <apiKey> -s <secret> -c<https://myproxyServer.com:8080> -u <username> -p <password>`
 
-download delivery
+10. <u>**download delivery</u> :**
 
 `-dd "productName#geography#rosterGranularity#dataFormat#version#vintage#minReleaseDate" -a <apiKey> -s <secret>`
 
-download delivery with proxy configuration information without username and password
+11. <u>**download delivery with proxy configuration information without username and password</u> :**
 
 `-dd "productName#geography#rosterGranularity#dataFormat#version#vintage#minReleaseDate" -a <apiKey> -s <secret> -c<https://myproxyServer.com:8080>`
 
-download delivery with proxy configuration information having username and password
+12. <u>**download delivery with proxy configuration information having username and password</u> :**
 
 `-dd "productName#geography#rosterGranularity#dataFormat#version#vintage#minReleaseDate" -a <apiKey> -s <secret> -c<https://myproxyServer.com:8080> -u <username> -p <password>`
 
-download latest delivery</br>  
+13. <u>**download latest delivery</u> :**
+
 `-dld "productName#geography#roster-granularity#format" -a <apiKey> -s <secret> c<https://myproxyServer.com:8080> --download-path <c:\downloads\> --s3-access <s3-access-key> --s3-secret <s3-secret key> --s3-bucket-name <s3-bucket-name> --s3-key-postfix <postfix>`  
   
-download latest delivery with optional arguments    
+
+14. <u>**download latest delivery with optional arguments</u> :**    
   
 saveToS3 (boolean) - Gives users an option to save the downloaded data to S3 and delete from local drive  
 convertToParquet (boolean) - Decompress all zip files from downloaded data and converts the files to Parquet  
   
 `-dld "productName#geography#roster-granularity#format#saveToS3#convertToParquet" -a <apiKey> -s <secret> -c<https://myproxyServer.com:8080> --download-path <c:\downloads\> --s3-access <s3-access-key> --s3-secret <s3-secret key> --s3-bucket-name <s3-bucket-name> --s3-key-postfix <postfix>`
 
-download latest delivery  
+15. <u>**download latest delivery</u> :**
+
 `-dld "productName#geography#rosterGranularity#dataFormat" -a <apiKey> -s <secret> --download-path <c:\downloads\> --s3-access <s3-access-key> --s3-secret <s3-secret key> --s3-bucket-name <s3-bucket-name> --s3-key-postfix <postfix>`
 
-download referential data 
+16. <u>**download referential data</u> :**
 
 `-drd "productName#geography#rosterGranularity#dataFormat#version" -a <apiKey> -s <secret> --download-path <c:\downloads\>  --s3-access <s3-access-key> --d  --suffix  --cli  --dv  --directoryName`
 
@@ -108,7 +111,7 @@ Download latest deliver command will download the latest vintage precisely has t
     Example: `java -jar "C:\DataDownloader\build\libs\data-downloader-3.0.3-all.jar"`  
 2. `-dld` : Download latest Delivery  
 3. Name of product you want to download (as a string seperated by #)  
-    Example: `"productName#geography#roster-granularity#format#saveToS3#convertToParquet"`  
+    Example: `"productName1#geography1#roster-granularity1#format1#saveToS3#convertToParquet,productName2#geography2#roster-granularity2#format2"`  
         i. productName : Name of the product. Example: Genealogy Parent-Child Data US  
         ii. geaography : The geographic region or extent of the product. Example: United States  
         iii. roster-granularity : The aggregate at which the data is stored in the file. Example: All USA
@@ -146,7 +149,7 @@ Download latest deliver list command will download the latest vintage precisely 
     v. Version : Version of the data you want to download. Example: 1.0.0
 
     Multiple products you want to download( as a string seperated by ,)    
-   Example: `"productName1#geography1#roster-granularity1#format1,productName2#geography2#roster-granularity2#format2"`
+   Example: `"productName1#geography1#roster-granularity1#format1#version1,productName2#geography2#roster-granularity2#format2#version2"`
 
 4. `-a`: Automatic Downloader API Key
 5. `-s` : Automatic Downloader Shared Secret Key
